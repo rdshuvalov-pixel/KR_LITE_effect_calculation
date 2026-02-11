@@ -10,6 +10,7 @@ from presentation_builder import (
     generate_html,
     save_presentation_and_manage_history,
 )
+from pdf_generator import export_html_to_pdf
 import io
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -2034,6 +2035,20 @@ if uploaded_file is not None:
                         mime="text/html",
                         help="Скачайте файл и откройте в браузере — все данные уже встроены",
                     )
+                    pdf_fn = static_path.with_suffix(".pdf").name
+                    try:
+                        pdf_path = export_html_to_pdf(static_path, static_path.with_suffix(".pdf"))
+                        pdf_bytes = pdf_path.read_bytes()
+                        st.download_button(
+                            label="📄 Скачать презентацию в PDF",
+                            data=pdf_bytes,
+                            file_name=pdf_fn,
+                            mime="application/pdf",
+                            help="PDF через WebKit (как Safari), 1 слайд = 1 страница",
+                            key="pdf_dl",
+                        )
+                    except Exception as pdf_err:
+                        st.caption(f"PDF недоступен: {pdf_err}")
             
             # --- WORD EXPORT ---
             # Button is inside Tab 5 now.
