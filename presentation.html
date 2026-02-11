@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Результаты тестирования ценообразования | KeepRise</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -28,10 +29,13 @@
       --border-radius-m: 16px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: var(--font-main); background: #545454; padding: 30px 20px; line-height: 1.6; color: var(--color-text-secondary); }
+    body { font-family: var(--font-main); background: #4a4a4a; padding: 15px 20px; line-height: 1.6; color: var(--color-text-secondary); }
     
+    /* Формат 16:9 как в PPT */
     .slide { 
-      width: 1265px; max-width: 95%; margin: 40px auto; padding: 50px; 
+      width: 1265px; max-width: 95%; margin: 15px auto; padding: 40px 50px;
+      height: 711px; min-height: 711px; overflow-y: auto; box-sizing: border-box;
+      display: flex; flex-direction: column;
       background: linear-gradient(135deg, #4a4a4a 0%, #444444 100%); 
       border-radius: 12px; 
       box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 10px 20px rgba(0,0,0,0.3);
@@ -59,7 +63,37 @@
     
     .slide h1 { font-size: 1.6rem; color: var(--color-text-primary); margin-bottom: 0.5rem; font-weight: 700; }
     .slide h2 { font-size: 1rem; color: var(--color-text-muted); font-weight: 500; margin-bottom: 1rem; }
+    /* Заголовки и подзаголовки всегда в верхнем левом углу */
+    .slide-header, .slide > h2 { align-self: flex-start; }
     .slide h3 { font-size: 1.1rem; color: var(--color-text-primary); font-weight: 600; margin-bottom: 0.75rem; }
+
+    /* Заголовок слайда в стиле PPT */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--color-border-light);
+    }
+    .slide-num {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--color-primary-accent), #7ab85a);
+      color: #1e1e1e;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .slide-title-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
     
     /* ПРИВЕТСТВЕННЫЙ СЛАЙД */
     .welcome-slide {
@@ -68,7 +102,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 400px;
+      min-height: 711px; height: 711px;
       background: linear-gradient(135deg, #3a3a3a 0%, #2e2e2e 50%, #3a3a3a 100%);
       position: relative;
       overflow: hidden;
@@ -142,8 +176,8 @@
     .product-intro .params span { display: flex; align-items: center; gap: 0.5rem; }
     .product-intro .params b { color: var(--color-text-primary); }
     
-    .chart-wrap { min-height: 480px; margin: 1.5rem 0; }
-    #chart { width: 100%; height: 480px; }
+    .chart-wrap { min-height: 360px; height: 360px; margin: 1rem 0; }
+    #chart { width: 100%; height: 360px; }
     
     .calc-section { 
       background: linear-gradient(145deg, #505050 0%, #3a3a3a 100%);
@@ -154,6 +188,12 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
     }
     .calc-step { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: flex-start; }
+    /* Слайд 4: сжатие по вертикали */
+    [data-slide="4"] .calc-section { padding: 1rem 1.25rem; margin-top: 0.75rem; }
+    [data-slide="4"] .calc-step { margin-bottom: 0.5rem; gap: 0.75rem; }
+    [data-slide="4"] .calc-step .num { width: 24px; height: 24px; font-size: 0.8rem; }
+    [data-slide="4"] .calc-step .desc { font-size: 0.85rem; margin-bottom: 0.2rem; }
+    [data-slide="4"] .calc-step .formula { font-size: 0.88rem; padding: 0.45rem 0.7rem; }
     .calc-step .num { background: var(--color-secondary-accent); color: #1e1e1e; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
     .calc-step .content { flex: 1; }
     .calc-step .desc { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 0.3rem; }
@@ -176,6 +216,12 @@
     .result-card.positive .value { color: var(--color-success); }
     .result-card.negative .value { color: var(--color-danger); }
     .result-card.neutral .value { color: var(--color-info); }
+    /* Слайд 5: блоки 1.5× и по центру (только контент) */
+    [data-slide="5"] { display: flex; flex-direction: column; align-items: center; }
+    [data-slide="5"] .result-summary { justify-content: center; gap: 2rem; margin-top: 2rem; }
+    [data-slide="5"] .result-card { min-width: 240px; padding: 1.5rem 1.875rem; transform: none; }
+    [data-slide="5"] .result-card .value { font-size: 2.25rem; }
+    [data-slide="5"] .result-card .label { font-size: 1rem; }
     
     .slide-divider { height: 4px; background: linear-gradient(90deg, var(--color-secondary-accent), var(--color-primary-accent)); margin: 0; border-radius: 2px; }
     
@@ -247,15 +293,80 @@
     .limitation-card.red .title { color: var(--color-danger); }
     
     .params-line { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border-light); font-size: 0.8rem; color: var(--color-text-muted); }
+    /* Техническая заметка внизу слайда — скромно */
+    .slide-content-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .params-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--color-border-light); font-size: 0.7rem; color: var(--color-text-muted); opacity: 0.85; flex-shrink: 0; }
     
     /* Компактная таблица */
     .compact-table { font-size: 0.8rem; }
     .compact-table th, .compact-table td { padding: 0.35rem 0 !important; }
+    /* Слайд 6: таблица 1.5× и по центру (только контент) */
+    [data-slide="6"] { display: flex; flex-direction: column; align-items: center; }
+    [data-slide="6"] .stat-card { max-width: 700px !important; }
+    [data-slide="6"] .stat-card h4 { font-size: 1.2rem; }
+    [data-slide="6"] .compact-table { font-size: 1.2rem; }
+    [data-slide="6"] .compact-table th, [data-slide="6"] .compact-table td { padding: 0.5rem 0.75rem !important; }
+    /* Слайд 7: блоки по центру (только контент) */
+    [data-slide="7"] { display: flex; flex-direction: column; align-items: center; }
+
+    /* ПЕЧАТЬ: 1 слайд = 1 лист, без рамок и артефактов */
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html, body { background: #444 !important; padding: 0 !important; margin: 0 !important; }
+      .slide {
+        page-break-before: always;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+        margin: 0 !important;
+        padding: 12mm 15mm !important;
+        width: 100% !important;
+        height: 210mm !important;
+        min-height: 210mm !important;
+        max-height: 210mm !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
+        background: #4a4a4a !important;
+      }
+      .slide:first-child { page-break-before: auto; }
+      .slide:last-child { page-break-after: avoid; }
+      /* Убираем 3D-тени и наложение — только границы */
+      .card-3d, .stat-card, .result-card, .product-intro, .calc-section,
+      .limitation-card, .scenario-box {
+        transform: none !important;
+        box-shadow: none !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+      }
+      /* Слайд 3 — график влезает, не уезжает вправо */
+      [data-slide="3"] .chart-wrap {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 280px !important;
+        min-height: 280px !important;
+        margin: 0.5rem 0 !important;
+        overflow: hidden !important;
+      }
+      [data-slide="3"] #chart {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 280px !important;
+      }
+      /* Слайд 7 — компактнее */
+      [data-slide="7"] .stat-card { padding: 0.75rem !important; }
+      [data-slide="7"] #pieChart { min-height: 100px !important; }
+      /* Слайд 8 — нейтральный фон сценариев (без розового/оранжевого) */
+      [data-slide="8"] .scenario-box {
+        background: rgba(0,0,0,0.15) !important;
+      }
+      /* Техническая заметка — не создаёт полосу */
+      .params-footer { margin-top: 0.5rem !important; padding-top: 0.5rem !important; }
+    }
   </style>
 </head>
 <body>
-  <!-- СЛАЙД 0: ПРИВЕТСТВИЕ -->
-  <div class="slide welcome-slide">
+  <!-- СЛАЙД 1: ТИТУЛЬНЫЙ -->
+  <div class="slide welcome-slide" data-slide="1">
     <div class="welcome-logo">KeepRise</div>
     <div class="welcome-title">Результаты тестирования ценообразования</div>
     <div class="welcome-subtitle" id="welcome-subtitle">Название файла | Дата презентации</div>
@@ -267,18 +378,17 @@
     </div>
   </div>
 
-  <!-- СЛАЙД 1: ПРИМЕР ПОЗИЦИИ -->
-  <div class="slide">
-    <h1>Анализ на примере одной позиции</h1>
-    <h2>Разберём методику расчёта эффекта переоценки</h2>
-    
-    <div class="info-block">
-      <p>
-        Для наглядности покажем, как именно мы определяем эффект переоценки и почему важны 
-        дотестовый период и сравнение с выручкой всего магазина.
-      </p>
+  <!-- СЛАЙД 2: ПРИМЕР ПОЗИЦИИ — Вводная -->
+  <div class="slide" data-slide="2">
+    <div class="slide-header">
+      <span class="slide-num">2</span>
+      <span class="slide-title-text">Пример позиции</span>
     </div>
-    
+    <h2>Объект анализа и периоды замера</h2>
+    <p style="color:var(--color-text-muted); margin-bottom:1rem; font-size:0.95rem">
+      Для наглядности разберём методику на одной позиции. Ниже — дотестовый и тестовый периоды, 
+      сравнение выручки позиции и всего магазина.
+    </p>
     <div class="product-intro card-3d">
       <div class="product-name" id="product-name">Название товара</div>
       <div class="params">
@@ -288,21 +398,34 @@
         <span>Тестовый период: <b id="test-weeks">—</b> (<span id="test-range">—</span>)</span>
       </div>
     </div>
-    
+  </div>
+
+  <!-- СЛАЙД 3: ГРАФИК ВЫРУЧКИ -->
+  <div class="slide" data-slide="3">
+    <div class="slide-header">
+      <span class="slide-num">3</span>
+      <span class="slide-title-text">Динамика выручки</span>
+    </div>
+    <h2>Сравнение выручки позиции и всего магазина по неделям</h2>
     <div class="legend-inline">
       <span><span class="dot" style="background:var(--color-info)"></span> Выручка всего магазина</span>
       <span><span class="dot" style="background:var(--color-danger)"></span> Выручка тестовой позиции</span>
       <span class="zone zone-pretest">Дотестовый период</span>
       <span class="zone zone-test">Тестовый период</span>
     </div>
-    
     <div class="chart-wrap">
       <div id="chart"></div>
     </div>
-    
+  </div>
+
+  <!-- СЛАЙД 4: РАСЧЁТ ЭФФЕКТА -->
+  <div class="slide" data-slide="4">
+    <div class="slide-header">
+      <span class="slide-num">4</span>
+      <span class="slide-title-text">Расчёт эффекта переоценки</span>
+    </div>
+    <h2>Методика определения дополнительной выручки</h2>
     <div class="calc-section card-3d">
-      <h3>Расчёт эффекта переоценки</h3>
-      
       <div class="calc-step">
         <div class="num">1</div>
         <div class="content">
@@ -356,42 +479,49 @@
           </div>
         </div>
       </div>
-      
-      <div class="result-summary">
-        <div class="result-card positive card-3d">
-          <div class="value" id="res-effect-pct">—</div>
-          <div class="label">Эффект переоценки</div>
-        </div>
-        <div class="result-card positive card-3d">
-          <div class="value" id="res-week">—</div>
-          <div class="label">Доп. выручка в неделю</div>
-        </div>
-        <div class="result-card positive card-3d">
-          <div class="value" id="res-total">—</div>
-          <div class="label">Доп. выручка за период</div>
-        </div>
+    </div>
+  </div>
+
+  <!-- СЛАЙД 5: ИТОГИ ПО ПОЗИЦИИ -->
+  <div class="slide" data-slide="5">
+    <div class="slide-header">
+      <span class="slide-num">5</span>
+      <span class="slide-title-text">Итоги по позиции</span>
+    </div>
+    <h2>Результат расчёта эффекта переоценки</h2>
+    <div class="result-summary">
+      <div class="result-card positive card-3d">
+        <div class="value" id="res-effect-pct">—</div>
+        <div class="label">Эффект переоценки</div>
+      </div>
+      <div class="result-card positive card-3d">
+        <div class="value" id="res-week">—</div>
+        <div class="label">Доп. выручка в неделю</div>
+      </div>
+      <div class="result-card positive card-3d">
+        <div class="value" id="res-total">—</div>
+        <div class="label">Доп. выручка за период</div>
       </div>
     </div>
   </div>
 
-  <!-- СЛАЙД 2: ОБЩАЯ СТАТИСТИКА -->
-  <div class="slide-divider"></div>
-  <div class="slide">
-    <h1>Общая статистика переоценки</h1>
-    <h2>Тестовый ассортимент: 267 позиций | Весь магазин: 4 259 позиций | Период: 4 недели</h2>
-    
-    <div class="stats-grid">
-      <!-- Строка 1: Переоценки + Результат по позициям -->
-      <div class="stat-card card-3d">
+  <!-- СЛАЙД 6: ВОЛНЫ ПЕРЕОЦЕНОК -->
+  <div class="slide" data-slide="6">
+    <div class="slide-header">
+      <span class="slide-num">6</span>
+      <span class="slide-title-text">Волны переоценок</span>
+    </div>
+    <h2>Хронология отправок, применений и анализа цен</h2>
+    <div class="stat-card card-3d" style="max-width:600px">
         <h4>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          1. Волны переоценок
+          Волны переоценок
         </h4>
           <table class="compact-table" style="width:100%; border-collapse:collapse">
           <thead>
             <tr style="color:var(--color-text-muted); border-bottom:2px solid var(--color-border-light)">
               <th style="text-align:left">Дата</th>
-              <th style="text-align:right">Отпр.</th>
+              <th style="text-align:right">Отправлено</th>
               <th style="text-align:right">Полка</th>
               <th style="text-align:right">Анализ</th>
             </tr>
@@ -401,32 +531,21 @@
           <tfoot id="price-changes-footer">
           </tfoot>
         </table>
-      </div>
-      
-      <!-- 5. Результат по позициям -->
-      <div class="stat-card card-3d" style="display:flex; flex-direction:column">
-        <h4>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-          5. Результат по позициям
-        </h4>
-        <div id="pieChart" style="flex:1; min-height:160px"></div>
-        <div class="sub-values" style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--color-border-light)">
-          <div class="sub-item">
-            <span id="growth-effect" class="val" style="font-size:1.2rem; color:var(--color-success); font-weight:700">—</span>
-            <span id="growth-count-label" class="lbl">—</span>
-          </div>
-          <div class="sub-item">
-            <span id="decline-effect" class="val" style="font-size:1.2rem; color:var(--color-danger); font-weight:700">—</span>
-            <span id="decline-count-label" class="lbl">—</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 2. ЭФФЕКТ -->
+    </div>
+  </div>
+
+  <!-- СЛАЙД 7: СУММАРНЫЙ ЭФФЕКТ, РЕЗУЛЬТАТ ПО ПОЗИЦИЯМ, ВЫРУЧКА ТЕСТОВОГО АССОРТИМЕНТА -->
+  <div class="slide" data-slide="7">
+    <div class="slide-header">
+      <span class="slide-num">7</span>
+      <span class="slide-title-text">Суммарный эффект, результат по позициям и выручка тестового ассортимента</span>
+    </div>
+    <h2>Итоги переоценки: выручка, прибыль, разбивка по позициям, фактическая выручка</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap:1.25rem; max-width:950px; margin:0 auto">
       <div class="stat-card card-3d">
         <h4>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          2. Суммарный эффект переоценки
+          Суммарный эффект переоценки
         </h4>
         <div class="sub-values" style="gap:2rem">
           <div class="sub-item">
@@ -439,12 +558,27 @@
           </div>
         </div>
       </div>
-      
-      <!-- 3. Выручка тестового ассортимента -->
-      <div class="stat-card card-3d">
+      <div class="stat-card card-3d" style="display:flex; flex-direction:column">
+        <h4>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          Результат по позициям
+        </h4>
+        <div id="pieChart" style="flex:1; min-height:140px"></div>
+        <div class="sub-values" style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--color-border-light)">
+          <div class="sub-item">
+            <span id="growth-effect" class="val" style="font-size:1.2rem; color:var(--color-success); font-weight:700">—</span>
+            <span id="growth-count-label" class="lbl">—</span>
+          </div>
+          <div class="sub-item">
+            <span id="decline-effect" class="val" style="font-size:1.2rem; color:var(--color-danger); font-weight:700">—</span>
+            <span id="decline-count-label" class="lbl">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card card-3d" style="grid-column: span 2">
         <h4>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          3. Выручка тестового ассортимента
+          Выручка тестового ассортимента
         </h4>
         <div class="comparison-bar">
           <div id="revenue-without-segment" class="segment without" style="width:70%">—</div>
@@ -465,9 +599,17 @@
           </div>
         </div>
       </div>
-      
-      <!-- 4. Охват и сценарии -->
-      <div class="stat-card card-3d" style="grid-column: span 2;">
+    </div>
+  </div>
+
+  <!-- СЛАЙД 8: ОХВАТ И СЦЕНАРИИ -->
+  <div class="slide" data-slide="8">
+    <div class="slide-header">
+      <span class="slide-num">8</span>
+      <span class="slide-title-text">Охват теста и модельные сценарии</span>
+    </div>
+    <h2>Доля тестового ассортимента и проекции при масштабировании</h2>
+    <div class="stat-card card-3d">
         <h4>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
           4. Охват теста и модельные сценарии
@@ -486,32 +628,35 @@
         <div style="background:rgba(0,0,0,0.2); border-radius:var(--border-radius-s); padding:1.25rem">
           <div style="font-size:0.95rem; color:var(--color-text-primary); margin-bottom:1rem; font-weight:600">Что если масштабировать результаты?</div>
           <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem">
-            <div style="background:rgba(131,180,214,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-info)">
+            <div class="scenario-box scenario-info" style="background:rgba(131,180,214,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-info)">
               <div style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.5rem">Если бы ваша цель была <b style="color:var(--color-text-primary)">+3% прирост по всему магазину</b>:</div>
               <div id="scenario1-revenue" style="font-size:1.4rem; color:var(--color-info); font-weight:700">—</div>
               <div id="scenario1-profit" style="font-size:0.9rem; color:var(--color-info)">—</div>
             </div>
-            <div style="background:rgba(161,214,131,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-success)">
+            <div class="scenario-box scenario-success" style="background:rgba(161,214,131,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-success)">
               <div style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.5rem">Если бы тестировали <b style="color:var(--color-text-primary)">в 2 раза больше товаров</b> (2.07%):</div>
               <div id="scenario2-revenue" style="font-size:1.4rem; color:var(--color-success); font-weight:700">—</div>
               <div id="scenario2-profit" style="font-size:0.9rem; color:var(--color-success)">—</div>
             </div>
-            <div style="background:rgba(214,161,131,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-warning)">
+            <div class="scenario-box scenario-warning" style="background:rgba(214,161,131,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-warning)">
               <div style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.5rem">Если применить <b style="color:var(--color-text-primary)">на весь ассортимент</b>, но эффект ×0.2:</div>
               <div id="scenario3-revenue" style="font-size:1.4rem; color:var(--color-warning); font-weight:700">—</div>
               <div id="scenario3-profit" style="font-size:0.9rem; color:var(--color-warning)">—</div>
             </div>
           </div>
         </div>
-      </div>
     </div>
-    
-    <!-- 6. ОГРАНИЧЕНИЯ -->
-    <div class="calc-section card-3d" style="margin-top:1.5rem">
-      <h3 style="display:flex; align-items:center; gap:0.5rem">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-info)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        6. Как мы считаем эффект: ограничения и фильтрация
-      </h3>
+  </div>
+
+  <!-- СЛАЙД 9: ОГРАНИЧЕНИЯ И ФИЛЬТРАЦИЯ -->
+  <div class="slide" data-slide="9">
+    <div class="slide-header">
+      <span class="slide-num">9</span>
+      <span class="slide-title-text">Ограничения и фильтрация</span>
+    </div>
+    <h2>Как мы считаем эффект: методология и ограничения</h2>
+    <div class="slide-content-area">
+    <div class="calc-section card-3d">
       <div class="limitations-grid">
         <div class="limitation-card">
           <div class="icon">
@@ -563,8 +708,7 @@
         </div>
       </div>
     </div>
-    
-    <div class="params-line" id="params-line">
+    <div class="params-line params-footer" id="params-line">
       <span id="param-pretest">—</span>
       <span>|</span>
       <span id="param-test">—</span>
@@ -572,6 +716,7 @@
       <span id="param-activation">—</span>
       <span>|</span>
       <span id="param-calc">—</span>
+    </div>
     </div>
   </div>
 
