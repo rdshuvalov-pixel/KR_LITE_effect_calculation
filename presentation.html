@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Результаты тестирования ценообразования | KeepRise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --color-bg-deep: #1e1e1e;
+      --color-bg-slide: #4a4a4a;
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --color-primary-accent: #a1d683;
+      --color-secondary-accent: #83b4d6;
+      --color-tertiary-accent: #d6a183;
+      --color-text-primary: #ffffff;
+      --color-text-secondary: rgba(255, 255, 255, 0.92);
+      --color-text-muted: rgba(255, 255, 255, 0.78);
+      --color-success: #a1d683;
+      --color-warning: #d6a183;
+      --color-danger: #d68383;
+      --color-info: #83b4d6;
+      --color-border-light: rgba(255, 255, 255, 0.15);
+      --font-main: 'Montserrat', sans-serif;
+      --border-radius-s: 8px;
+      --border-radius-m: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-main); background: #545454; padding: 30px 20px; line-height: 1.6; color: var(--color-text-secondary); }
+    
+    .slide { 
+      width: 1265px; max-width: 95%; margin: 40px auto; padding: 50px; 
+      background: linear-gradient(135deg, #4a4a4a 0%, #444444 100%); 
+      border-radius: 12px; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 10px 20px rgba(0,0,0,0.3);
+    }
+    
+    /* 3D ЭФФЕКТ ДЛЯ КАРТОЧЕК */
+    .card-3d {
+      background: linear-gradient(145deg, #505050 0%, #3a3a3a 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 
+        0 10px 30px rgba(0,0,0,0.4),
+        0 5px 15px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(0,0,0,0.2);
+      transform: perspective(1000px) rotateX(1deg);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-3d:hover {
+      transform: perspective(1000px) rotateX(0deg) translateY(-3px);
+      box-shadow: 
+        0 15px 40px rgba(0,0,0,0.5),
+        0 8px 20px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    
+    .slide h1 { font-size: 1.6rem; color: var(--color-text-primary); margin-bottom: 0.5rem; font-weight: 700; }
+    .slide h2 { font-size: 1rem; color: var(--color-text-muted); font-weight: 500; margin-bottom: 1rem; }
+    .slide h3 { font-size: 1.1rem; color: var(--color-text-primary); font-weight: 600; margin-bottom: 0.75rem; }
+    
+    /* ПРИВЕТСТВЕННЫЙ СЛАЙД */
+    .welcome-slide {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      background: linear-gradient(135deg, #3a3a3a 0%, #2e2e2e 50%, #3a3a3a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-slide::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--color-primary-accent) 0%, transparent 70%);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+    .welcome-slide::after {
+      content: '';
+      position: absolute;
+      bottom: -50%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--color-secondary-accent) 0%, transparent 70%);
+      opacity: 0.06;
+      pointer-events: none;
+    }
+    .welcome-logo {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--color-primary-accent);
+      margin-bottom: 1.5rem;
+      letter-spacing: 2px;
+    }
+    .welcome-title {
+      font-size: 1.8rem;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .welcome-subtitle {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+      margin-bottom: 2rem;
+    }
+    .welcome-message {
+      max-width: 700px;
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: var(--color-text-secondary);
+      background: rgba(161, 214, 131, 0.1);
+      border: 1px solid rgba(161, 214, 131, 0.3);
+      border-radius: var(--border-radius-m);
+      padding: 2rem 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    .welcome-message .highlight { color: var(--color-primary-accent); font-weight: 600; }
+    
+    .highlight { color: var(--color-primary-accent); font-weight: 600; }
+    
+    .product-intro { 
+      background: linear-gradient(145deg, rgba(161, 214, 131, 0.15) 0%, rgba(161, 214, 131, 0.08) 100%);
+      border-left: 4px solid var(--color-primary-accent); 
+      border-radius: 0 var(--border-radius-s) var(--border-radius-s) 0; 
+      padding: 1.25rem 1.5rem; 
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .product-intro .product-name { font-size: 1.2rem; font-weight: 700; color: var(--color-primary-accent); margin-bottom: 0.5rem; }
+    .product-intro .params { display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--color-text-muted); }
+    .product-intro .params span { display: flex; align-items: center; gap: 0.5rem; }
+    .product-intro .params b { color: var(--color-text-primary); }
+    
+    .chart-wrap { min-height: 480px; margin: 1.5rem 0; }
+    #chart { width: 100%; height: 480px; }
+    
+    .calc-section { 
+      background: linear-gradient(145deg, #505050 0%, #3a3a3a 100%);
+      border: 1px solid var(--glass-border); 
+      border-radius: var(--border-radius-m); 
+      padding: 1.5rem; 
+      margin-top: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .calc-step { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: flex-start; }
+    .calc-step .num { background: var(--color-secondary-accent); color: #1e1e1e; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+    .calc-step .content { flex: 1; }
+    .calc-step .desc { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .calc-step .formula { font-family: 'Consolas', monospace; font-size: 0.95rem; color: var(--color-text-secondary); background: rgba(0,0,0,0.25); padding: 0.6rem 0.9rem; border-radius: var(--border-radius-s); }
+    .calc-step .formula .val { color: var(--color-success); font-weight: 600; }
+    .calc-step .formula .neg { color: var(--color-danger); font-weight: 600; }
+    .calc-step .formula .highlight { color: var(--color-warning); font-weight: 700; }
+    
+    .result-summary { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border-light); }
+    .result-card { 
+      background: linear-gradient(145deg, #454545 0%, #353535 100%);
+      border-radius: var(--border-radius-s); 
+      padding: 1rem 1.25rem; 
+      min-width: 160px; 
+      border: 1px solid var(--color-border-light);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .result-card .value { font-size: 1.5rem; font-weight: 700; }
+    .result-card .label { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem; }
+    .result-card.positive .value { color: var(--color-success); }
+    .result-card.negative .value { color: var(--color-danger); }
+    .result-card.neutral .value { color: var(--color-info); }
+    
+    .slide-divider { height: 4px; background: linear-gradient(90deg, var(--color-secondary-accent), var(--color-primary-accent)); margin: 0; border-radius: 2px; }
+    
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 1.25rem; }
+    .stat-card { 
+      background: linear-gradient(145deg, #505050 0%, #3a3a3a 100%);
+      border: 1px solid var(--glass-border); 
+      border-radius: var(--border-radius-m); 
+      padding: 1.25rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .stat-card h4 { margin: 0 0 1rem; font-size: 0.95rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+    .stat-card .big-value { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .stat-card .big-value.positive { color: var(--color-success); }
+    .stat-card .big-value.negative { color: var(--color-danger); }
+    .stat-card .big-value.neutral { color: var(--color-info); }
+    .sub-values { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .sub-item { display: flex; flex-direction: column; }
+    .sub-item .val { font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); }
+    .sub-item .lbl { font-size: 0.75rem; color: var(--color-text-muted); }
+    
+    .comparison-bar { display: flex; height: 36px; border-radius: var(--border-radius-s); overflow: hidden; margin: 0.75rem 0; }
+    .comparison-bar .segment { display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; }
+    .comparison-bar .without { background: #5a5a5a; color: var(--color-text-secondary); }
+    .comparison-bar .with { background: var(--color-success); color: #1e1e1e; }
+    .bar-legend { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--color-text-muted); }
+    .bar-legend span { display: flex; align-items: center; gap: 0.35rem; }
+    .bar-legend .dot { width: 10px; height: 10px; border-radius: 3px; }
+    
+    .legend-inline { display: flex; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.9rem; flex-wrap: wrap; }
+    .legend-inline span { display: flex; align-items: center; gap: 0.5rem; }
+    .legend-inline .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .legend-inline .zone { padding: 3px 10px; border-radius: var(--border-radius-s); }
+    .legend-inline .zone-pretest { background: rgba(161, 214, 131, 0.25); }
+    .legend-inline .zone-test { background: rgba(131, 180, 214, 0.25); }
+
+    .info-block { 
+      background: linear-gradient(145deg, rgba(131, 180, 214, 0.15) 0%, rgba(131, 180, 214, 0.08) 100%);
+      border-left: 4px solid var(--color-info); 
+      border-radius: 0 var(--border-radius-s) var(--border-radius-s) 0; 
+      padding: 1rem 1.25rem; 
+      margin: 1rem 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .info-block p { font-size: 0.9rem; color: var(--color-text-secondary); line-height: 1.6; }
+    
+    .limitations-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem; }
+    .limitation-card { 
+      background: linear-gradient(145deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 100%);
+      border-radius: var(--border-radius-s); 
+      padding: 1rem; 
+      border-left: 3px solid var(--color-info);
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .limitation-card .icon { width: 40px; height: 40px; flex-shrink: 0; }
+    .limitation-card .icon svg { width: 100%; height: 100%; }
+    .limitation-card .text-content { flex: 1; }
+    .limitation-card .title { font-weight: 600; color: var(--color-info); margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .limitation-card .text { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; }
+    .limitation-card .text b { color: var(--color-text-primary); }
+    .limitation-card.green { border-left-color: var(--color-success); }
+    .limitation-card.green .title { color: var(--color-success); }
+    .limitation-card.orange { border-left-color: var(--color-warning); }
+    .limitation-card.orange .title { color: var(--color-warning); }
+    .limitation-card.red { border-left-color: var(--color-danger); }
+    .limitation-card.red .title { color: var(--color-danger); }
+    
+    .params-line { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border-light); font-size: 0.8rem; color: var(--color-text-muted); }
+    
+    /* Компактная таблица */
+    .compact-table { font-size: 0.8rem; }
+    .compact-table th, .compact-table td { padding: 0.35rem 0 !important; }
+  </style>
+</head>
+<body>
+  <!-- СЛАЙД 0: ПРИВЕТСТВИЕ -->
+  <div class="slide welcome-slide">
+    <div class="welcome-logo">KeepRise</div>
+    <div class="welcome-title">Результаты тестирования ценообразования</div>
+    <div class="welcome-subtitle" id="welcome-subtitle">Название файла | Дата презентации</div>
+    <div class="welcome-message">
+      <span class="highlight">Спасибо, что вы были с KeepRise и провели тестирование ценообразования на своём магазине!</span><br><br>
+      Ниже мы предоставляем результаты расчёта эффекта переоценки и подробно рассказываем о том, 
+      как мы этот расчёт производили. Вы увидите, какие позиции участвовали в тесте, 
+      какой эффект был получен и какие ограничения мы учитывали при замере.
+    </div>
+  </div>
+
+  <!-- СЛАЙД 1: ПРИМЕР ПОЗИЦИИ -->
+  <div class="slide">
+    <h1>Анализ на примере одной позиции</h1>
+    <h2>Разберём методику расчёта эффекта переоценки</h2>
+    
+    <div class="info-block">
+      <p>
+        Для наглядности покажем, как именно мы определяем эффект переоценки и почему важны 
+        дотестовый период и сравнение с выручкой всего магазина.
+      </p>
+    </div>
+    
+    <div class="product-intro card-3d">
+      <div class="product-name" id="product-name">Название товара</div>
+      <div class="params">
+        <span>Код: <b id="product-code">—</b></span>
+        <span>Дата отправки цены: <b id="price-send-date">—</b></span>
+        <span>Дотестовый период: <b id="pretest-weeks">—</b> (<span id="pretest-range">—</span>)</span>
+        <span>Тестовый период: <b id="test-weeks">—</b> (<span id="test-range">—</span>)</span>
+      </div>
+    </div>
+    
+    <div class="legend-inline">
+      <span><span class="dot" style="background:var(--color-info)"></span> Выручка всего магазина</span>
+      <span><span class="dot" style="background:var(--color-danger)"></span> Выручка тестовой позиции</span>
+      <span class="zone zone-pretest">Дотестовый период</span>
+      <span class="zone zone-test">Тестовый период</span>
+    </div>
+    
+    <div class="chart-wrap">
+      <div id="chart"></div>
+    </div>
+    
+    <div class="calc-section card-3d">
+      <h3>Расчёт эффекта переоценки</h3>
+      
+      <div class="calc-step">
+        <div class="num">1</div>
+        <div class="content">
+          <div class="desc">Как изменилась выручка всего магазина (без тестовых позиций)?</div>
+          <div class="formula" id="formula-ctrl">
+            Было: <span id="f1-pre">—</span> ₽/нед. → Стало: <span id="f1-post">—</span> ₽/нед.<br>
+            Изменение = <span id="f1-change">—</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="calc-step">
+        <div class="num">2</div>
+        <div class="content">
+          <div class="desc">Как изменилась выручка тестовой позиции?</div>
+          <div class="formula" id="formula-pos">
+            Было: <span id="f2-pre">—</span> ₽/нед. → Стало: <span id="f2-post">—</span> ₽/нед.<br>
+            Изменение = <span id="f2-change">—</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="calc-step">
+        <div class="num">3</div>
+        <div class="content">
+          <div class="desc">Эффект переоценки = разница между изменением выручки позиции и всего магазина</div>
+          <div class="formula" id="formula-effect">
+            Эффект = Прирост позиции − Прирост магазина<br>
+            Эффект = <span id="f3">—</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="calc-step">
+        <div class="num">4</div>
+        <div class="content">
+          <div class="desc">Абсолютное значение эффекта на среднюю недельную выручку</div>
+          <div class="formula" id="formula-abs-week">
+            Дополнительная выручка в неделю = Средняя выручка (дотест) × Эффект<br>
+            = <span id="f4">—</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="calc-step">
+        <div class="num">5</div>
+        <div class="content">
+          <div class="desc">Эффект за весь тестовый период (<span id="test-weeks-n">—</span> недель)</div>
+          <div class="formula" id="formula-abs-total">
+            Дополнительная выручка за период = <span id="f5">—</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="result-summary">
+        <div class="result-card positive card-3d">
+          <div class="value" id="res-effect-pct">—</div>
+          <div class="label">Эффект переоценки</div>
+        </div>
+        <div class="result-card positive card-3d">
+          <div class="value" id="res-week">—</div>
+          <div class="label">Доп. выручка в неделю</div>
+        </div>
+        <div class="result-card positive card-3d">
+          <div class="value" id="res-total">—</div>
+          <div class="label">Доп. выручка за период</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- СЛАЙД 2: ОБЩАЯ СТАТИСТИКА -->
+  <div class="slide-divider"></div>
+  <div class="slide">
+    <h1>Общая статистика переоценки</h1>
+    <h2>Тестовый ассортимент: 267 позиций | Весь магазин: 4 259 позиций | Период: 4 недели</h2>
+    
+    <div class="stats-grid">
+      <!-- Строка 1: Переоценки + Результат по позициям -->
+      <div class="stat-card card-3d">
+        <h4>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          1. Волны переоценок
+        </h4>
+          <table class="compact-table" style="width:100%; border-collapse:collapse">
+          <thead>
+            <tr style="color:var(--color-text-muted); border-bottom:2px solid var(--color-border-light)">
+              <th style="text-align:left">Дата</th>
+              <th style="text-align:right">Отпр.</th>
+              <th style="text-align:right">Полка</th>
+              <th style="text-align:right">Анализ</th>
+            </tr>
+          </thead>
+          <tbody id="price-changes-body" style="color:var(--color-text-secondary)">
+          </tbody>
+          <tfoot id="price-changes-footer">
+          </tfoot>
+        </table>
+      </div>
+      
+      <!-- 5. Результат по позициям -->
+      <div class="stat-card card-3d" style="display:flex; flex-direction:column">
+        <h4>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          5. Результат по позициям
+        </h4>
+        <div id="pieChart" style="flex:1; min-height:160px"></div>
+        <div class="sub-values" style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--color-border-light)">
+          <div class="sub-item">
+            <span id="growth-effect" class="val" style="font-size:1.2rem; color:var(--color-success); font-weight:700">—</span>
+            <span id="growth-count-label" class="lbl">—</span>
+          </div>
+          <div class="sub-item">
+            <span id="decline-effect" class="val" style="font-size:1.2rem; color:var(--color-danger); font-weight:700">—</span>
+            <span id="decline-count-label" class="lbl">—</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 2. ЭФФЕКТ -->
+      <div class="stat-card card-3d">
+        <h4>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          2. Суммарный эффект переоценки
+        </h4>
+        <div class="sub-values" style="gap:2rem">
+          <div class="sub-item">
+            <span id="effect-revenue-abs" class="val" style="font-size:2.2rem; color:var(--color-success); font-weight:700">—</span>
+            <span id="effect-revenue-pct" class="lbl"><b style="color:var(--color-text-secondary)">по выручке</b> (—)</span>
+          </div>
+          <div class="sub-item">
+            <span id="effect-profit-abs" class="val" style="font-size:2.2rem; color:var(--color-success); font-weight:700">—</span>
+            <span id="effect-profit-pct" class="lbl"><b style="color:var(--color-text-secondary)">по прибыли</b> (—)</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 3. Выручка тестового ассортимента -->
+      <div class="stat-card card-3d">
+        <h4>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          3. Выручка тестового ассортимента
+        </h4>
+        <div class="comparison-bar">
+          <div id="revenue-without-segment" class="segment without" style="width:70%">—</div>
+          <div id="revenue-effect-segment" class="segment with" style="width:30%">—</div>
+        </div>
+        <div class="bar-legend">
+          <span><span class="dot" style="background:#5a5a5a"></span> Без эффекта</span>
+          <span><span class="dot" style="background:var(--color-success)"></span> Эффект</span>
+        </div>
+        <div class="sub-values" style="margin-top:0.75rem">
+          <div class="sub-item">
+            <span id="revenue-with-effect" class="val" style="font-size:1.5rem; font-weight:700">—</span>
+            <span class="lbl">Факт выручка</span>
+          </div>
+          <div class="sub-item">
+            <span id="profit-with-effect" class="val" style="font-size:1.5rem; font-weight:700">—</span>
+            <span class="lbl">Факт прибыль</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 4. Охват и сценарии -->
+      <div class="stat-card card-3d" style="grid-column: span 2;">
+        <h4>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+          4. Охват теста и модельные сценарии
+        </h4>
+        <div style="display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center">
+          <div class="sub-item">
+            <span id="test-share-revenue" class="val" style="font-size:2rem; color:var(--color-warning); font-weight:700">—</span>
+            <span class="lbl">Доля тест. асс. <b style="color:var(--color-text-secondary)">по выручке</b></span>
+          </div>
+          <div class="sub-item">
+            <span id="test-share-profit" class="val" style="font-size:2rem; color:var(--color-warning); font-weight:700">—</span>
+            <span class="lbl">Доля тест. асс. <b style="color:var(--color-text-secondary)">по прибыли</b></span>
+          </div>
+        </div>
+        
+        <div style="background:rgba(0,0,0,0.2); border-radius:var(--border-radius-s); padding:1.25rem">
+          <div style="font-size:0.95rem; color:var(--color-text-primary); margin-bottom:1rem; font-weight:600">Что если масштабировать результаты?</div>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem">
+            <div style="background:rgba(131,180,214,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-info)">
+              <div style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.5rem">Если бы ваша цель была <b style="color:var(--color-text-primary)">+3% прирост по всему магазину</b>:</div>
+              <div id="scenario1-revenue" style="font-size:1.4rem; color:var(--color-info); font-weight:700">—</div>
+              <div id="scenario1-profit" style="font-size:0.9rem; color:var(--color-info)">—</div>
+            </div>
+            <div style="background:rgba(161,214,131,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-success)">
+              <div style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.5rem">Если бы тестировали <b style="color:var(--color-text-primary)">в 2 раза больше товаров</b> (2.07%):</div>
+              <div id="scenario2-revenue" style="font-size:1.4rem; color:var(--color-success); font-weight:700">—</div>
+              <div id="scenario2-profit" style="font-size:0.9rem; color:var(--color-success)">—</div>
+            </div>
+            <div style="background:rgba(214,161,131,0.1); border-radius:var(--border-radius-s); padding:1rem; border-left:3px solid var(--color-warning)">
+              <div style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.5rem">Если применить <b style="color:var(--color-text-primary)">на весь ассортимент</b>, но эффект ×0.2:</div>
+              <div id="scenario3-revenue" style="font-size:1.4rem; color:var(--color-warning); font-weight:700">—</div>
+              <div id="scenario3-profit" style="font-size:0.9rem; color:var(--color-warning)">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 6. ОГРАНИЧЕНИЯ -->
+    <div class="calc-section card-3d" style="margin-top:1.5rem">
+      <h3 style="display:flex; align-items:center; gap:0.5rem">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-info)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        6. Как мы считаем эффект: ограничения и фильтрация
+      </h3>
+      <div class="limitations-grid">
+        <div class="limitation-card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-info)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="text-content">
+            <div class="title">Индивидуальные периоды</div>
+            <div class="text">
+              У каждой позиции <b>своя дата начала теста</b> — когда была применена новая цена. 
+              Дотестовый период индивидуален для каждого товара.
+            </div>
+          </div>
+        </div>
+        <div class="limitation-card orange">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div class="text-content">
+            <div class="title">Проверка «нашей» цены</div>
+            <div class="text">
+              Учитываем только недели, когда <b>на полке стояла рекомендованная цена</b>. 
+              Изменённые цены исключаются.
+            </div>
+          </div>
+        </div>
+        <div class="limitation-card green">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <div class="text-content">
+            <div class="title">Фильтрация по остаткам</div>
+            <div class="text">
+              Если товара <b>не было в наличии достаточное время</b> — такие недели исключаются, 
+              чтобы out-of-stock не искажал замер.
+            </div>
+          </div>
+        </div>
+        <div class="limitation-card red">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="text-content">
+            <div class="title">Почему мало позиций?</div>
+            <div class="text">
+              Из 486 рекомендаций только 157 применили, и лишь <b>21 прошла все фильтры</b>: 
+              цена «наша», товар в наличии, есть данные.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="params-line" id="params-line">
+      <span id="param-pretest">—</span>
+      <span>|</span>
+      <span id="param-test">—</span>
+      <span>|</span>
+      <span id="param-activation">—</span>
+      <span>|</span>
+      <span id="param-calc">—</span>
+    </div>
+  </div>
+
+  <script>
+    function fmtWeek(s) {
+      const start = new Date(s), end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      const fmt = d => d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+      return fmt(start) + '–' + fmt(end);
+    }
+
+    function fmtRub(n) {
+      return Math.round(n).toLocaleString('ru-RU') + ' ₽';
+    }
+
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+    function setHtml(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+
+    function initWelcome(stats) {
+      const subtitle = document.getElementById('welcome-subtitle');
+      if (!subtitle) return;
+
+      const fileName = stats && stats.sourceFileName ? stats.sourceFileName : 'Файл не указан';
+      const baseName = fileName.replace(/\.[^.]+$/, '');
+
+      let createdDate;
+      if (stats && stats.generatedAt) {
+        const d = new Date(stats.generatedAt);
+        createdDate = isNaN(d.getTime()) ? new Date() : d;
+      } else {
+        createdDate = new Date();
+      }
+
+      const dateStr = createdDate.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      subtitle.textContent = baseName + ' | ' + dateStr;
+    }
+
+    function initProductIntro(presentation) {
+      if (!presentation) return;
+
+      setText('product-name', presentation.productName || 'Тестовая позиция');
+      setText('product-code', presentation.productId != null ? String(presentation.productId) : '—');
+
+      const weeks = presentation.weeks || [];
+      const preN = presentation.preTestWeeks || 0;
+      const testN = presentation.testWeeks || 0;
+
+      if (weeks.length && preN > 0) {
+        const preStart = fmtWeek(weeks[0]).split('–')[0];
+        const preEnd = fmtWeek(weeks[Math.max(preN - 1, 0)]).split('–')[1];
+        setText('pretest-weeks', preN + ' нед.');
+        setText('pretest-range', preStart + '–' + preEnd);
+      }
+
+      if (weeks.length && testN > 0 && preN + testN <= weeks.length) {
+        const testStart = fmtWeek(weeks[preN]).split('–')[0];
+        const testEnd = fmtWeek(weeks[preN + testN - 1]).split('–')[1];
+        setText('test-weeks', testN + ' нед.');
+        setText('test-range', testStart + '–' + testEnd);
+        setText('price-send-date', testStart);
+      }
+
+      initFormulas(presentation);
+    }
+
+    function initFormulas(presentation) {
+      if (!presentation) return;
+      const preC = presentation.preTestCtrlAvg || 0;
+      const postC = presentation.testCtrlAvg || 0;
+      const preP = presentation.preTestPosAvg || 0;
+      const postP = presentation.testPosAvg || 0;
+      const posG = presentation.posGrowth || 0;
+      const ctrlG = presentation.ctrlGrowth || 0;
+      const effect = presentation.effect || 0;
+      const testN = presentation.testWeeks || 0;
+      const effPerWeek = Math.round(preP * (effect / 100));
+      const effTotal = effPerWeek * testN;
+
+      setText('f1-pre', fmtRub(preC));
+      setText('f1-post', fmtRub(postC));
+      setHtml('f1-change', '(…) − 1 = <span class="' + (ctrlG >= 0 ? 'val' : 'neg') + '">' + (ctrlG >= 0 ? '+' : '') + ctrlG.toFixed(1) + '%</span>');
+
+      setText('f2-pre', fmtRub(preP));
+      setText('f2-post', fmtRub(postP));
+      setHtml('f2-change', '(…) − 1 = <span class="val">' + (posG >= 0 ? '+' : '') + posG.toFixed(1) + '%</span>');
+
+      setHtml('f3', (posG >= 0 ? '+' : '') + posG.toFixed(1) + '% − (' + (ctrlG >= 0 ? '+' : '') + ctrlG.toFixed(1) + '%) = <span class="highlight">' + (effect >= 0 ? '+' : '') + effect.toFixed(1) + '%</span>');
+
+      setHtml('f4', fmtRub(preP) + ' × ' + effect.toFixed(1) + '% = <span class="val">+' + fmtRub(effPerWeek) + ' ₽/неделю</span>');
+      setText('test-weeks-n', String(testN));
+      setHtml('f5', fmtRub(effPerWeek) + ' × ' + testN + ' недель = <span class="highlight">+' + fmtRub(effTotal) + '</span>');
+      setText('res-effect-pct', (effect >= 0 ? '+' : '') + effect.toFixed(1) + '%');
+      setText('res-week', '+' + fmtRub(effPerWeek));
+      setText('res-total', '+' + fmtRub(effTotal));
+    }
+
+    function initLineChart(presentation) {
+      if (!presentation) return;
+
+      const weeks = presentation.weeks || [];
+      if (!weeks.length) return;
+
+      const DATA = {
+        weeks: weeks,
+        revenuePosition: presentation.revenuePosition || [],
+        revenueControl: presentation.revenueControl || [],
+        preTestWeeks: presentation.preTestWeeks || 0,
+        testWeeks: presentation.testWeeks || 0,
+        preTestPosAvg: presentation.preTestPosAvg || 0,
+        testPosAvg: presentation.testPosAvg || 0,
+        preTestCtrlAvg: presentation.preTestCtrlAvg || 0,
+        testCtrlAvg: presentation.testCtrlAvg || 0,
+      };
+
+      const labels = DATA.weeks.map(fmtWeek);
+      const PRETEST = DATA.preTestWeeks;
+      const TEST = DATA.testWeeks;
+
+      const chartDom = document.getElementById('chart');
+      if (!chartDom) return;
+
+      const chart = echarts.init(chartDom);
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { top: 100, bottom: 50, left: 90, right: 90 },
+        xAxis: {
+          type: 'category', data: labels,
+          axisLine: { lineStyle: { color: '#666' } },
+          axisLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 11 },
+          splitLine: { show: false }
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: 'Весь магазин',
+            nameTextStyle: { color: '#83b4d6', fontSize: 11 },
+            position: 'left',
+            axisLine: { lineStyle: { color: '#83b4d6' } },
+            axisLabel: {
+              color: '#83b4d6',
+              formatter: v => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v
+            },
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } }
+          },
+          {
+            type: 'value',
+            name: 'Тестовая позиция',
+            nameTextStyle: { color: '#d68383', fontSize: 11 },
+            position: 'right',
+            axisLine: { lineStyle: { color: '#d68383' } },
+            axisLabel: {
+              color: '#d68383',
+              formatter: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v
+            },
+            splitLine: { show: false }
+          }
+        ],
+        series: [
+          {
+            name: 'Весь магазин',
+            type: 'line',
+            data: DATA.revenueControl,
+            yAxisIndex: 0,
+            smooth: 0.3,
+            symbol: 'circle',
+            symbolSize: 10,
+            lineStyle: { color: '#83b4d6', width: 3 },
+            itemStyle: { color: '#83b4d6' },
+            areaStyle: { color: 'rgba(131, 180, 214, 0.1)' },
+            label: {
+              show: true,
+              position: 'left',
+              distance: 10,
+              formatter: p => (p.value / 1000).toFixed(0) + 'k',
+              color: '#83b4d6',
+              fontSize: 11,
+              backgroundColor: 'rgba(30,30,30,0.9)',
+              borderColor: '#83b4d6',
+              borderWidth: 1,
+              borderRadius: 4,
+              padding: [3, 6]
+            },
+            markArea: {
+              silent: true,
+              data: [
+                [{ xAxis: 0, itemStyle: { color: 'rgba(161, 214, 131, 0.2)' } }, { xAxis: PRETEST - 1 }],
+                [{ xAxis: PRETEST, itemStyle: { color: 'rgba(131, 180, 214, 0.2)' } }, { xAxis: PRETEST + TEST - 1 }]
+              ]
+            },
+            markLine: {
+              silent: true,
+              symbol: 'none',
+              lineStyle: { color: 'rgba(255,255,255,0.4)', type: 'dashed', width: 2 },
+              data: [{ xAxis: PRETEST - 0.5 }]
+            }
+          },
+          {
+            name: 'Тестовая позиция',
+            type: 'line',
+            data: DATA.revenuePosition,
+            yAxisIndex: 1,
+            smooth: 0.3,
+            symbol: 'circle',
+            symbolSize: 10,
+            lineStyle: { color: '#d68383', width: 3 },
+            itemStyle: { color: '#d68383' },
+            areaStyle: { color: 'rgba(214, 131, 131, 0.1)' },
+            label: {
+              show: true,
+              position: 'right',
+              distance: 10,
+              formatter: p => fmtRub(p.value),
+              color: '#d68383',
+              fontSize: 11,
+              backgroundColor: 'rgba(30,30,30,0.9)',
+              borderColor: '#d68383',
+              borderWidth: 1,
+              borderRadius: 4,
+              padding: [3, 6]
+            }
+          }
+        ],
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(30,30,30,0.95)',
+          borderColor: '#555',
+          textStyle: { color: '#eee' },
+          formatter: params => {
+            let html = '<b>' + params[0].axisValue + '</b><br/>';
+            params.forEach(p => {
+              html += p.marker + ' ' + p.seriesName + ': <b>' + fmtRub(p.value) + '</b><br/>';
+            });
+            return html;
+          }
+        }
+      });
+
+      function updateBrackets() {
+        const getX = (idx) => chart.convertToPixel({ xAxisIndex: 0 }, idx);
+        const x0 = getX(0), x3 = getX(PRETEST - 1), x4 = getX(PRETEST), x7 = getX(PRETEST + TEST - 1);
+        const step = PRETEST > 1 ? (x3 - x0) / (PRETEST - 1) / 2 : 0;
+        const preLeft = x0 - step, preRight = x3 + step, testLeft = x4 - step, testRight = x7 + step;
+
+        chart.setOption({
+          graphic: [{
+            type: 'group',
+            children: [
+              {
+                type: 'polyline',
+                shape: { points: [[preLeft, 85], [preLeft, 60], [preRight, 60], [preRight, 85]] },
+                style: { stroke: '#a1d683', lineWidth: 4, fill: 'none' }
+              },
+              {
+                type: 'text',
+                x: (preLeft + preRight) / 2,
+                y: 32,
+                style: { text: 'ДОТЕСТ', fill: '#a1d683', fontSize: 14, fontWeight: 700, textAlign: 'center' }
+              },
+              {
+                type: 'text',
+                x: (preLeft + preRight) / 2,
+                y: 50,
+                style: {
+                  text: 'Магазин: ' + fmtRub(DATA.preTestCtrlAvg) + ' | Позиция: ' + fmtRub(DATA.preTestPosAvg),
+                  fill: 'rgba(255,255,255,0.85)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textAlign: 'center'
+                }
+              },
+              {
+                type: 'polyline',
+                shape: { points: [[testLeft, 85], [testLeft, 60], [testRight, 60], [testRight, 85]] },
+                style: { stroke: '#83b4d6', lineWidth: 4, fill: 'none' }
+              },
+              {
+                type: 'text',
+                x: (testLeft + testRight) / 2,
+                y: 32,
+                style: { text: 'ТЕСТ', fill: '#83b4d6', fontSize: 14, fontWeight: 700, textAlign: 'center' }
+              },
+              {
+                type: 'text',
+                x: (testLeft + testRight) / 2,
+                y: 50,
+                style: {
+                  text: 'Магазин: ' + fmtRub(DATA.testCtrlAvg) + ' | Позиция: ' + fmtRub(DATA.testPosAvg),
+                  fill: 'rgba(255,255,255,0.85)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textAlign: 'center'
+                }
+              }
+            ]
+          }]
+        });
+      }
+
+      setTimeout(updateBrackets, 100);
+      window.addEventListener('resize', () => {
+        chart.resize();
+        setTimeout(updateBrackets, 100);
+      });
+    }
+
+    function initParamsLine(stats) {
+      const p = stats && stats.usedParams ? stats.usedParams : {};
+      const preN = p.preTestWeeks ?? 2;
+      const prePct = p.preTestStockPct ?? 10;
+      const contiguous = p.contiguousPreTest !== false;
+      const stockFilter = p.useStockFilter === true;
+      const stockPct = p.stockThresholdPct ?? 30;
+      const actPct = p.activationThreshold ?? 1;
+      const roundVal = p.roundValue ?? 90;
+      const roundDir = p.roundDirection === 'up' ? '↑' : (p.roundDirection === 'down' ? '↓' : '~');
+      const minDays = p.minDaysWap ?? 2;
+      const weekValues = p.testUseWeekValues !== false;
+      const useRound = p.useRounding === true;
+
+      setHtml('param-pretest', '<b>Дотестовый:</b> ' + preN + ' нед., ' + (contiguous ? 'непрерывный' : 'не непрерывный') + ', ≥' + prePct + '% остаток');
+      setHtml('param-test', '<b>Тестовый:</b> ≥' + stockPct + '% от базы, фильтрация ' + (stockFilter ? 'вкл.' : 'выкл.'));
+      setHtml('param-activation', '<b>Активация:</b> ' + actPct + '%' + (useRound ? ', округл. ' + roundDir + roundVal + ' коп.' : '') + ', WAP ≥' + minDays + 'д');
+      setHtml('param-calc', '<b>Расчёт:</b> ' + (weekValues ? 'значение текущей недели' : 'среднее по тестовым неделям'));
+    }
+
+    function initStatsSlide(stats) {
+      if (!stats) return;
+
+      // 1. Таблица переоценок
+      const body = document.getElementById('price-changes-body');
+      const footer = document.getElementById('price-changes-footer');
+      if (body && Array.isArray(stats.priceChanges)) {
+        body.innerHTML = '';
+        let totalSent = 0;
+        let totalActivated = 0;
+        let totalAccepted = 0;
+
+        stats.priceChanges.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+
+          const tdDate = document.createElement('td');
+          tdDate.textContent = row.date;
+
+          const tdSent = document.createElement('td');
+          tdSent.style.textAlign = 'right';
+          tdSent.textContent = String(row.sent);
+
+          const tdActivated = document.createElement('td');
+          tdActivated.style.textAlign = 'right';
+          tdActivated.style.color = 'var(--color-warning)';
+          tdActivated.textContent = String(row.activated);
+
+          const tdAccepted = document.createElement('td');
+          tdAccepted.style.textAlign = 'right';
+          tdAccepted.style.color = row.accepted > 0 ? 'var(--color-success)' : 'var(--color-danger)';
+          tdAccepted.textContent = String(row.accepted);
+
+          tr.appendChild(tdDate);
+          tr.appendChild(tdSent);
+          tr.appendChild(tdActivated);
+          tr.appendChild(tdAccepted);
+          body.appendChild(tr);
+
+          totalSent += row.sent;
+          totalActivated += row.activated;
+          totalAccepted += row.accepted;
+        });
+
+        if (footer) {
+          footer.innerHTML = '';
+          const tr = document.createElement('tr');
+          tr.style.borderTop = '2px solid var(--color-border-light)';
+          tr.style.fontWeight = '700';
+          tr.style.color = 'var(--color-text-primary)';
+
+          const tdLabel = document.createElement('td');
+          tdLabel.textContent = 'Итого';
+
+          const tdSent = document.createElement('td');
+          tdSent.style.textAlign = 'right';
+          tdSent.textContent = String(totalSent);
+
+          const tdActivated = document.createElement('td');
+          tdActivated.style.textAlign = 'right';
+          tdActivated.style.color = 'var(--color-warning)';
+          tdActivated.textContent = String(totalActivated);
+
+          const tdAccepted = document.createElement('td');
+          tdAccepted.style.textAlign = 'right';
+          tdAccepted.style.color = 'var(--color-success)';
+          tdAccepted.textContent = String(totalAccepted);
+
+          tr.appendChild(tdLabel);
+          tr.appendChild(tdSent);
+          tr.appendChild(tdActivated);
+          tr.appendChild(tdAccepted);
+          footer.appendChild(tr);
+        }
+      }
+
+      // 2. Эффект (выручка/прибыль)
+      setText('effect-revenue-abs', fmtRub(stats.absEffectRevenue || 0));
+      setText('effect-profit-abs', fmtRub(stats.absEffectProfit || 0));
+      const revPct = typeof stats.effectRevenuePct === 'number' ? stats.effectRevenuePct.toFixed(2) + '%' : '—';
+      const profPct = typeof stats.effectProfitPct === 'number' ? stats.effectProfitPct.toFixed(2) + '%' : '—';
+      const revLbl = document.getElementById('effect-revenue-pct');
+      const profLbl = document.getElementById('effect-profit-pct');
+      if (revLbl) {
+        revLbl.innerHTML = '<b style="color:var(--color-text-secondary)">по выручке</b> (' + revPct + ')';
+      }
+      if (profLbl) {
+        profLbl.innerHTML = '<b style="color:var(--color-text-secondary)">по прибыли</b> (' + profPct + ')';
+      }
+
+      // 3. Выручка тестового ассортимента
+      const revWithout = stats.revenueWithoutEffect || 0;
+      const revWith = stats.revenueWithEffect || 0;
+      const effectAbs = stats.absEffectRevenue || 0;
+
+      const totalForBar = Math.max(revWithout + Math.max(effectAbs, 0), 1);
+      const effectWidth = Math.max(Math.min((Math.max(effectAbs, 0) / totalForBar) * 100, 80), 5);
+      const withoutWidth = 100 - effectWidth;
+
+      const withoutSeg = document.getElementById('revenue-without-segment');
+      const effectSeg = document.getElementById('revenue-effect-segment');
+      if (withoutSeg) {
+        withoutSeg.style.width = withoutWidth.toFixed(1) + '%';
+        withoutSeg.textContent = fmtRub(revWithout);
+      }
+      if (effectSeg) {
+        effectSeg.style.width = effectWidth.toFixed(1) + '%';
+        effectSeg.textContent = '+' + fmtRub(effectAbs);
+      }
+
+      setText('revenue-with-effect', fmtRub(revWith));
+      setText('profit-with-effect', fmtRub(stats.profitWithEffect || 0));
+
+      // 4. Охват
+      if (typeof stats.testShareRevenue === 'number') {
+        setText('test-share-revenue', stats.testShareRevenue.toFixed(2) + '%');
+      }
+      if (typeof stats.testShareProfit === 'number') {
+        setText('test-share-profit', stats.testShareProfit.toFixed(2) + '%');
+      }
+
+      // 5. Модельные сценарии
+      if (stats.scenario1) {
+        setText('scenario1-revenue', '+' + fmtRub(stats.scenario1.targetRevenue || 0));
+        setText('scenario1-profit', '+' + fmtRub(stats.scenario1.targetProfit || 0) + ' прибыль');
+      }
+      if (stats.scenario2) {
+        setText('scenario2-revenue', '+' + fmtRub(stats.scenario2.effectRevenue || 0));
+        setText('scenario2-profit', '+' + fmtRub(stats.scenario2.effectProfit || 0) + ' прибыль');
+      }
+      if (stats.scenario3) {
+        setText('scenario3-revenue', '+' + fmtRub(stats.scenario3.effectRevenue || 0));
+        setText('scenario3-profit', '+' + fmtRub(stats.scenario3.effectProfit || 0) + ' прибыль');
+      }
+
+      // 6. Карточка результатов по позициям
+      setText('growth-effect', '+' + fmtRub(stats.growthEffectRevenue || 0));
+      setText('decline-effect', (stats.declineEffectRevenue || 0) >= 0 ? fmtRub(stats.declineEffectRevenue) : '−' + fmtRub(Math.abs(stats.declineEffectRevenue)));
+      setText('growth-count-label', (stats.growthCount || 0) + ' с ростом');
+      setText('decline-count-label', (stats.declineCount || 0) + ' снижение');
+
+      initParamsLine(stats);
+
+      // Pie chart
+      const pieChartDom = document.getElementById('pieChart');
+      if (pieChartDom) {
+        const pieChart = echarts.init(pieChartDom);
+        const growthCount = stats.growthCount || 0;
+        const declineCount = stats.declineCount || 0;
+        pieChart.setOption({
+          backgroundColor: 'transparent',
+          series: [{
+            type: 'pie',
+            radius: ['40%', '75%'],
+            center: ['50%', '50%'],
+            data: [
+              { value: growthCount, name: 'Рост (' + growthCount + ')', itemStyle: { color: '#a1d683' } },
+              { value: declineCount, name: 'Снижение (' + declineCount + ')', itemStyle: { color: '#d68383' } }
+            ],
+            label: {
+              show: true,
+              formatter: '{b}',
+              color: 'rgba(255,255,255,0.9)',
+              fontSize: 11
+            },
+            labelLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } }
+          }]
+        });
+        window.addEventListener('resize', () => pieChart.resize());
+      }
+    }
+
+    (async function init() {
+      try {
+        let presentation = null;
+        let stats = null;
+        if (typeof window.PRESENTATION_DATA !== 'undefined') {
+          presentation = window.PRESENTATION_DATA;
+        }
+        if (typeof window.STATS_DATA !== 'undefined') {
+          stats = window.STATS_DATA;
+        }
+        if (!presentation && !stats) {
+          const [presentationRes, statsRes] = await Promise.all([
+            fetch('presentation_data.json'),
+            fetch('stats_data.json')
+          ]);
+          presentation = presentationRes.ok ? await presentationRes.json() : null;
+          stats = statsRes.ok ? await statsRes.json() : null;
+        }
+
+        initWelcome(stats);
+        initProductIntro(presentation);
+        initLineChart(presentation);
+        initStatsSlide(stats);
+      } catch (e) {
+        console.error('Ошибка загрузки данных для презентации:', e);
+      }
+    })();
+  </script>
+</body>
+</html>
