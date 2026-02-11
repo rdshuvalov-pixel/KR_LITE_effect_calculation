@@ -1,13 +1,31 @@
 """
-Генерация PDF из HTML-презентации через Playwright WebKit (как Safari).
+Генерация PDF из HTML-презентации через Playwright Chromium.
 """
+import subprocess
+import sys
 from pathlib import Path
 from typing import Optional, Union
+
+_browsers_installed = False
+
+
+def _ensure_playwright_browsers() -> None:
+    """Скачивает Chromium при первом вызове (нужно для Streamlit Cloud)."""
+    global _browsers_installed
+    if _browsers_installed:
+        return
+    subprocess.run(
+        [sys.executable, "-m", "playwright", "install", "chromium"],
+        capture_output=True,
+        timeout=180,
+        check=False,
+    )
+    _browsers_installed = True
 
 
 def export_html_to_pdf(html_path: Union[str, Path], pdf_path: Optional[Union[str, Path]] = None) -> Path:
     """
-    Конвертирует HTML в PDF через WebKit (Safari).
+    Конвертирует HTML в PDF через Playwright Chromium.
 
     :param html_path: путь к HTML-файлу
     :param pdf_path: путь для PDF (по умолчанию — рядом с HTML, расширение .pdf)
@@ -28,6 +46,8 @@ def export_html_to_pdf(html_path: Union[str, Path], pdf_path: Optional[Union[str
         raise ImportError(
             "Установите Playwright: python3 -m pip install playwright && python3 -m playwright install chromium"
         )
+
+    _ensure_playwright_browsers()
 
     with sync_playwright() as p:
         browser = p.chromium.launch()

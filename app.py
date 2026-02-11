@@ -2044,7 +2044,7 @@ if uploaded_file is not None:
                             data=pdf_bytes,
                             file_name=pdf_fn,
                             mime="application/pdf",
-                            help="PDF через WebKit (как Safari), 1 слайд = 1 страница",
+                            help="PDF через Playwright (Chromium), 1 слайд = 1 страница",
                             key="pdf_dl",
                         )
                     except Exception as pdf_err:
