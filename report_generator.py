@@ -71,7 +71,7 @@ class WordReportGenerator:
                     else:
                         row_cells[i].text = str(val)
                 elif isinstance(val, (pd.Timestamp, datetime.date)):
-                    row_cells[i].text = val.strftime('%d.%m.%Y')
+                    row_cells[i].text = val.strftime('%d.%m.%Y') if not pd.isna(val) else "-"
                 else:
                     row_cells[i].text = str(val) if val is not None else "-"
 
