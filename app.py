@@ -142,7 +142,7 @@ with st.sidebar:
     else:
         activation_round_direction = "nearest"
 
-uploaded_file = st.file_uploader("Загрузите файл Excel (S-Market.xlsx)", type=['xlsx'])
+uploaded_file = st.file_uploader("Загрузите файл XLSX", type=['xlsx'])
 
 # Блок восстановления данных (Restore)
 if uploaded_file is not None:
