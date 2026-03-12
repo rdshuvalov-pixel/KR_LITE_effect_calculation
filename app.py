@@ -245,7 +245,8 @@ if uploaded_file is not None:
                 st.session_state['uploaded_file_size'] = uploaded_file.size
 
                 # Отладочная информация при успехе
-                res_df = getattr(calc, 'results_df', None) or pd.DataFrame()
+                _res = getattr(calc, 'results_df', None)
+                res_df = _res if _res is not None else pd.DataFrame()
                 valid_count = (res_df['Is_Excluded'] == False).sum() if not res_df.empty and 'Is_Excluded' in res_df.columns else 0
                 excl_count = len(res_df) - valid_count if not res_df.empty else 0
                 st.session_state['debug_info'] = {
