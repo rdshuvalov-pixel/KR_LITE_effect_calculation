@@ -5,44 +5,35 @@
 """
 
 import pandas as pd
-from openpyxl import load_workbook
-from datetime import datetime, timedelta
+from datetime import timedelta
 import os
 
-# Константы - находим файл с учетом неразрывного пробела
-def find_input_file():
-    """Находит файл с new_cost в имени, учитывая неразрывные пробелы."""
-    for file in os.listdir('.'):
-        if 'new_cost' in file and file.endswith('.xlsx'):
-            return file
-    raise FileNotFoundError("Не найден файл с 'new_cost' в имени")
-
-INPUT_FILE = find_input_file()
 SHEET_NAME = 'Себестоимость'
 NEW_SHEET_NAME = 'Восстановленные данные'
 START_DATE = pd.to_datetime('2025-09-22')
 
 
-def restore_cost_history():
+def find_input_file():
+    """Находит файл с new_cost в имени (для CLI)."""
+    for file in os.listdir('.'):
+        if 'new_cost' in file and file.endswith('.xlsx'):
+            return file
+    raise FileNotFoundError("Не найден файл с 'new_cost' в имени")
+
+
+def restore_cost_history(input_file):
     """
-    Восстанавливает исторические данные себестоимости для товаров.
+    Восстанавливает исторические данные себестоимости.
+    input_file: путь к xlsx.
+    Добавляет вкладку «Восстановленные данные» с историей с 22.09.2025.
     """
-    print(f"Чтение данных из файла {INPUT_FILE}, вкладка '{SHEET_NAME}'...")
-    
-    # Читаем исходные данные
-    df = pd.read_excel(INPUT_FILE, sheet_name=SHEET_NAME)
+    df = pd.read_excel(input_file, sheet_name=SHEET_NAME)
     
     # Преобразуем дату в datetime
     df['date'] = pd.to_datetime(df['date'])
     
-    print(f"Загружено {len(df)} строк данных")
-    print(f"Уникальных товаров: {df['product_id'].nunique()}")
-    
-    # Группируем по product_id и находим минимальную дату для каждого товара
-    print("\nОбработка данных по товарам...")
     earliest_dates = df.groupby('product_id')['date'].min()
     
-    # Получаем значения stock и cost на минимальную дату для каждого товара
     restored_rows = []
     
     for product_id, min_date in earliest_dates.items():
@@ -65,40 +56,28 @@ def restore_cost_history():
                     'date': date
                 })
     
-    # Создаем DataFrame из восстановленных данных
     restored_df = pd.DataFrame(restored_rows)
     
-    print(f"\nСгенерировано {len(restored_df)} строк восстановленных данных")
-    print(f"Уникальных товаров с восстановленными данными: {restored_df['product_id'].nunique()}")
-    
     if len(restored_df) == 0:
-        print("Нет данных для восстановления (все товары имеют даты <= 22.09.2025)")
-        return
+        return {'rows': 0, 'products': 0, 'message': 'Нет данных для восстановления (все товары имеют даты <= 22.09.2025)'}
     
-    # Сортируем по product_id и date для удобства
+    # Сортируем
     restored_df = restored_df.sort_values(['product_id', 'date']).reset_index(drop=True)
     
-    # Открываем Excel файл для записи
-    print(f"\nСохранение данных в новую вкладку '{NEW_SHEET_NAME}'...")
-    
-    # Загружаем существующий файл
-    book = load_workbook(INPUT_FILE)
-    
-    # Удаляем вкладку, если она уже существует
-    if NEW_SHEET_NAME in book.sheetnames:
-        book.remove(book[NEW_SHEET_NAME])
-    
-    # Создаем новую вкладку
-    with pd.ExcelWriter(INPUT_FILE, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        # Записываем данные в новую вкладку
+    with pd.ExcelWriter(input_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
         restored_df.to_excel(writer, sheet_name=NEW_SHEET_NAME, index=False)
-    
-    print(f"Данные успешно сохранены в вкладку '{NEW_SHEET_NAME}'")
-    print(f"\nСтатистика:")
-    print(f"  - Всего строк: {len(restored_df)}")
-    print(f"  - Уникальных товаров: {restored_df['product_id'].nunique()}")
-    print(f"  - Диапазон дат: {restored_df['date'].min().date()} - {restored_df['date'].max().date()}")
+
+    return {
+        'rows': len(restored_df),
+        'products': restored_df['product_id'].nunique(),
+        'date_min': restored_df['date'].min(),
+        'date_max': restored_df['date'].max()
+    }
 
 
 if __name__ == '__main__':
-    restore_cost_history()
+    import sys
+    path = sys.argv[1] if len(sys.argv) > 1 else find_input_file()
+    r = restore_cost_history(path)
+    if r:
+        print(f"Готово: {r['rows']} строк, {r['products']} товаров")

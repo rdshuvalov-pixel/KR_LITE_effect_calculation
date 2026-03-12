@@ -16,6 +16,26 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import datetime
 from pathlib import Path
+import tempfile
+
+from restore_cost_from_sales import restore_cost_from_sales
+from restore_cost_history import restore_cost_history
+
+
+def _get_error_recommendation(err):
+    """Рекомендации по типу ошибки."""
+    err_str = str(err).lower()
+    err_type = type(err).__name__
+    if "sheet" in err_str or "No module" in err_str or KeyError.__name__ in err_type:
+        return "Проверьте наличие листов: **Продажи**, **Тестовые цены**, **Себестоимость**."
+    if "stock" in err_str or "column" in err_str or "not found" in err_str:
+        return "Проверьте колонки: Продажи (product_id, recorded_on, price, quantity, name_full), Себестоимость (product_id, date, cost, **stock**), Тестовые цены (product_id, New_Price_Start, New_Price)."
+    if "date" in err_str or "datetime" in err_str or "nat" in err_str or "timestamp" in err_str:
+        return "Проверьте формат дат: recorded_on (Продажи), date (Себестоимость), New_Price_Start (Тестовые цены). Невалидные даты исключаются."
+    if "empty" in err_str or "no data" in err_str:
+        return "Файл пуст или нет пересечения данных. Убедитесь, что в Продажах и Тестовых ценах есть общие product_id."
+    return "Проверьте структуру файла по образцу S-Market.xlsx."
+
 
 st.set_page_config(page_title="Калькулятор Эффективности Ценообразования", layout="wide")
 
@@ -111,6 +131,59 @@ with st.sidebar:
 
 uploaded_file = st.file_uploader("Загрузите файл Excel (S-Market.xlsx)", type=['xlsx'])
 
+# Блок восстановления данных (Restore)
+if uploaded_file is not None:
+    if st.session_state.get('restore_file_key') != uploaded_file.name:
+        st.session_state.pop('restore_download', None)
+        st.session_state['restore_file_key'] = uploaded_file.name
+    with st.expander("🔄 Восстановление данных (Restore)", expanded=False):
+        st.caption("Предобработка файла перед расчётом. Результат — скачать изменённый Excel.")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Восстановить себестоимость из продаж", key="btn_restore_sales"):
+                with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+                    tmp.write(uploaded_file.getvalue())
+                    tmp_path = tmp.name
+                try:
+                    result = restore_cost_from_sales(tmp_path)
+                    with open(tmp_path, 'rb') as f:
+                        st.session_state['restore_download'] = {
+                            'data': f.read(), 'name': f"restored_from_sales_{uploaded_file.name}", 'msg': f"{result['rows']} строк, {result['products']} товаров"
+                        }
+                    Path(tmp_path).unlink(missing_ok=True)
+                except Exception as e:
+                    Path(tmp_path).unlink(missing_ok=True)
+                    st.session_state['restore_error'] = str(e)
+        with col2:
+            if st.button("Восстановить историю себестоимости", key="btn_restore_history"):
+                with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+                    tmp.write(uploaded_file.getvalue())
+                    tmp_path = tmp.name
+                try:
+                    result = restore_cost_history(tmp_path)
+                    if result and result.get('rows', 0) > 0:
+                        with open(tmp_path, 'rb') as f:
+                            st.session_state['restore_download'] = {
+                                'data': f.read(), 'name': f"restored_history_{uploaded_file.name}", 'msg': f"Добавлено {result['rows']} строк"
+                            }
+                        Path(tmp_path).unlink(missing_ok=True)
+                    else:
+                        Path(tmp_path).unlink(missing_ok=True)
+                        st.session_state['restore_info'] = result.get('message', 'Нет данных для восстановления.')
+                except Exception as e:
+                    Path(tmp_path).unlink(missing_ok=True)
+                    st.session_state['restore_error'] = str(e)
+
+        if st.session_state.get('restore_error'):
+            st.error(st.session_state.pop('restore_error'))
+        if st.session_state.get('restore_info'):
+            st.info(st.session_state.pop('restore_info'))
+        if st.session_state.get('restore_download'):
+            dl = st.session_state['restore_download']
+            st.success(f"Готово: {dl['msg']}")
+            st.download_button("📥 Скачать результат", data=dl['data'], file_name=dl['name'], mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key="dl_restore")
+    st.divider()
+
 if uploaded_file is not None:
     try:
         calc = EffectCalculator(uploaded_file)
@@ -125,25 +198,44 @@ if uploaded_file is not None:
         
         if should_run:
             with st.spinner('Обработка данных и расчет...'):
-                # Preprocessing
-                calc.preprocess()
-                
-                # Calculation
-                results = calc.calculate(
-                    use_stock_filter=use_stock_filter, 
-                    stock_threshold_pct=threshold_pct,
-                    pre_test_weeks_count=pre_test_weeks,
-                    pre_test_stock_threshold=pre_test_threshold,
-                    contiguous_pre_test=contiguous_pre_test,
-                    test_use_week_values=(test_calc_mode == "Значение текущей недели"),
-                    activation_threshold=activation_threshold,
-                    activation_use_rounding=use_rounding,
-                    activation_round_value=round_value,
-                    activation_round_direction=activation_round_direction,
-                    activation_wap_from_change_date=activation_wap_from_change_date,
-                    activation_min_days_threshold=min_days_threshold
-                )
-                summary = calc.get_summary()
+                try:
+                    # Preprocessing
+                    calc.preprocess()
+                except Exception as prep_err:
+                    prep_err._debug_stage = 'preprocess'
+                    st.session_state['debug_info'] = {
+                        'status': 'error',
+                        'stage': 'preprocess',
+                        'message': str(prep_err),
+                        'recommendation': _get_error_recommendation(prep_err)
+                    }
+                    raise
+                try:
+                    # Calculation
+                    results = calc.calculate(
+                        use_stock_filter=use_stock_filter, 
+                        stock_threshold_pct=threshold_pct,
+                        pre_test_weeks_count=pre_test_weeks,
+                        pre_test_stock_threshold=pre_test_threshold,
+                        contiguous_pre_test=contiguous_pre_test,
+                        test_use_week_values=(test_calc_mode == "Значение текущей недели"),
+                        activation_threshold=activation_threshold,
+                        activation_use_rounding=use_rounding,
+                        activation_round_value=round_value,
+                        activation_round_direction=activation_round_direction,
+                        activation_wap_from_change_date=activation_wap_from_change_date,
+                        activation_min_days_threshold=min_days_threshold
+                    )
+                    summary = calc.get_summary()
+                except Exception as calc_err:
+                    calc_err._debug_stage = 'calculate'
+                    st.session_state['debug_info'] = {
+                        'status': 'error',
+                        'stage': 'calculate',
+                        'message': str(calc_err),
+                        'recommendation': _get_error_recommendation(calc_err)
+                    }
+                    raise
                 
                 # Store results in session state to persist after other interactions
                 st.session_state['results'] = results
@@ -151,6 +243,21 @@ if uploaded_file is not None:
                 st.session_state['calc_instance'] = calc  # Need instance for details
                 st.session_state['uploaded_file_name'] = uploaded_file.name
                 st.session_state['uploaded_file_size'] = uploaded_file.size
+
+                # Отладочная информация при успехе
+                res_df = getattr(calc, 'results_df', None) or pd.DataFrame()
+                valid_count = (res_df['Is_Excluded'] == False).sum() if not res_df.empty and 'Is_Excluded' in res_df.columns else 0
+                excl_count = len(res_df) - valid_count if not res_df.empty else 0
+                st.session_state['debug_info'] = {
+                    'status': 'ok',
+                    'file': uploaded_file.name,
+                    'test_products': len(calc.test_product_ids),
+                    'control_products': len(calc.control_product_ids),
+                    'results_rows': len(res_df),
+                    'valid_weeks': int(valid_count),
+                    'excluded_weeks': excl_count,
+                    'summary_empty': summary is None
+                }
 
                 # Генерация презентации под текущий расчёт (FIFO, последние 3)
                 try:
@@ -267,13 +374,19 @@ if uploaded_file is not None:
                 st.markdown("### Результаты по направлениям")
                 g_stats = summary.get('growth_stats', {})
                 d_stats = summary.get('decline_stats', {})
+                u_stats = summary.get('unchanged_stats', {})
                 
-                col_g, col_d = st.columns(2)
+                col_g, col_u, col_d = st.columns(3)
                 
                 with col_g:
                     st.success(f"📈 РОСТ: {g_stats.get('count', 0)} позиций")
                     st.write(f"Эффект (Выручка): **{g_stats.get('revenue_effect', 0):,.0f} ₽**")
                     st.write(f"Эффект (Прибыль): **{g_stats.get('profit_effect', 0):,.0f} ₽**")
+                
+                with col_u:
+                    st.info(f"➡️ БЕЗ ИЗМЕНЕНИЙ: {u_stats.get('count', 0)} позиций")
+                    st.write(f"Эффект (Выручка): **{u_stats.get('revenue_effect', 0):,.0f} ₽**")
+                    st.write(f"Эффект (Прибыль): **{u_stats.get('profit_effect', 0):,.0f} ₽**")
                     
                 with col_d:
                     st.error(f"📉 ПАДЕНИЕ: {d_stats.get('count', 0)} позиций")
@@ -288,7 +401,11 @@ if uploaded_file is not None:
                 
                 effect_map = {}
                 
-                included_pids = set(results['product_id'].unique()) if not results.empty else set()
+                all_results_pids = set(results['product_id'].unique()) if not results.empty else set()
+                included_pids = set()
+                if summary:
+                    for key in ('growth_stats', 'decline_stats', 'unchanged_stats'):
+                        included_pids.update(summary.get(key, {}).get('product_ids', []))
                 excluded_pids = set(all_test_pids) - included_pids
                 
                 activation_threshold = st.session_state.get("activation_threshold", 10)
@@ -346,14 +463,20 @@ if uploaded_file is not None:
                         if 'Abs_Effect_Profit' in results.columns:
                             effect_map_prof = results.groupby('product_id')['Abs_Effect_Profit'].sum().to_dict()
                 
-                growth_pids = {pid for pid, eff in effect_map_rev.items() if eff > 0}
-                decline_pids = {pid for pid, eff in effect_map_rev.items() if eff <= 0}
+                _g_stats = summary.get('growth_stats', {})
+                _d_stats = summary.get('decline_stats', {})
+                _u_stats = summary.get('unchanged_stats', {})
+                growth_pids = set(_g_stats.get('product_ids', []))
+                decline_pids = set(_d_stats.get('product_ids', []))
+                unchanged_pids = set(_u_stats.get('product_ids', []))
                 
-                filter_mode = st.radio("Фильтр списка:", ["Все", "Рост 📈", "Падение 📉", "Исключенные ❌"], horizontal=True)
+                filter_mode = st.radio("Фильтр списка:", ["Все", "Рост 📈", "Без изменений ➡️", "Падение 📉", "Исключенные ❌"], horizontal=True)
                 
                 filtered_pids = all_test_pids
                 if filter_mode == "Рост 📈":
                     filtered_pids = sorted(list(growth_pids))
+                elif filter_mode == "Без изменений ➡️":
+                    filtered_pids = sorted(list(unchanged_pids))
                 elif filter_mode == "Падение 📉":
                     filtered_pids = sorted(list(decline_pids))
                 elif filter_mode == "Исключенные ❌":
@@ -368,12 +491,29 @@ if uploaded_file is not None:
                         if pid in included_pids:
                             eff_rev = effect_map_rev.get(pid, 0)
                             eff_prof = effect_map_prof.get(pid, 0)
-                            icon = "📈" if eff_rev > 0 else "📉"
+                            if pid in growth_pids:
+                                icon = "📈"
+                            elif pid in decline_pids:
+                                icon = "📉"
+                            else:
+                                icon = "➡️"
                             return f"{icon} [{pid}] {name} (Rev: {eff_rev:,.0f} ₽, Prof: {eff_prof:,.0f} ₽)"
                         else:
                             return f"❌ [{pid}] {name}"
                     
-                    selected_pid = st.selectbox("Выберите товар:", filtered_pids, format_func=format_func)
+                    synced_pid_tab2 = st.session_state.get('synced_product_id')
+                    if synced_pid_tab2 is not None and synced_pid_tab2 in filtered_pids:
+                        st.session_state['_tab2_product_select'] = synced_pid_tab2
+                    
+                    def _on_product_select():
+                        st.session_state['synced_product_id'] = st.session_state['_tab2_product_select']
+                    
+                    selected_pid = st.selectbox(
+                        "Выберите товар:", filtered_pids,
+                        format_func=format_func,
+                        key="_tab2_product_select",
+                        on_change=_on_product_select
+                    )
                 
                 if selected_pid:
                     timeline = calc.get_product_timeline(selected_pid)
@@ -591,6 +731,35 @@ if uploaded_file is not None:
                         - если продаж нет, статус зависит от наличия подтвержденной нашей цены ранее.
                         """)
                     
+                    # Фильтр по товарам (синхронизирован с вкладкой «Анализ товара»)
+                    act_product_ids = sorted(activation_df['product_id'].unique().tolist())
+                    act_name_map = dict(zip(activation_df['product_id'], activation_df['product_name']))
+                    ALL_LABEL = "Все товары"
+                    act_filter_options = [ALL_LABEL] + [f"[{pid}] {act_name_map.get(pid, '')}" for pid in act_product_ids]
+                    act_label_to_pid = {f"[{pid}] {act_name_map.get(pid, '')}": pid for pid in act_product_ids}
+                    act_pid_to_label = {pid: label for label, pid in act_label_to_pid.items()}
+
+                    synced_pid = st.session_state.get('synced_product_id')
+                    if synced_pid is not None and synced_pid in act_pid_to_label:
+                        st.session_state['_act_product_select'] = act_pid_to_label[synced_pid]
+
+                    def _on_act_select_change():
+                        val = st.session_state.get('_act_product_select', ALL_LABEL)
+                        if val != ALL_LABEL and val in act_label_to_pid:
+                            st.session_state['synced_product_id'] = act_label_to_pid[val]
+                        else:
+                            st.session_state.pop('synced_product_id', None)
+
+                    selected_act_label = st.selectbox(
+                        "Фильтр по товару:",
+                        options=act_filter_options,
+                        key="_act_product_select",
+                        on_change=_on_act_select_change
+                    )
+                    if selected_act_label != ALL_LABEL and selected_act_label in act_label_to_pid:
+                        selected_act_pid = act_label_to_pid[selected_act_label]
+                        activation_df = activation_df[activation_df['product_id'] == selected_act_pid]
+
                     # Column selection expander
                     with st.expander("Выбрать колонки для отображения"):
                         col1, col2, col3 = st.columns(3)
@@ -1917,13 +2086,19 @@ if uploaded_file is not None:
                         st.markdown("### Результаты по направлениям")
                         g_stats = summary.get('growth_stats', {})
                         d_stats = summary.get('decline_stats', {})
+                        u_stats = summary.get('unchanged_stats', {})
                         
-                        col_g, col_d = st.columns(2)
+                        col_g, col_u, col_d = st.columns(3)
                         
                         with col_g:
                             st.success(f"📈 РОСТ: {g_stats.get('count', 0)} позиций")
                             st.write(f"Эффект (Выручка): **{g_stats.get('revenue_effect', 0):,.0f} ₽**")
                             st.write(f"Эффект (Прибыль): **{g_stats.get('profit_effect', 0):,.0f} ₽**")
+                        
+                        with col_u:
+                            st.info(f"➡️ БЕЗ ИЗМЕНЕНИЙ: {u_stats.get('count', 0)} позиций")
+                            st.write(f"Эффект (Выручка): **{u_stats.get('revenue_effect', 0):,.0f} ₽**")
+                            st.write(f"Эффект (Прибыль): **{u_stats.get('profit_effect', 0):,.0f} ₽**")
                             
                         with col_d:
                             st.error(f"📉 ПАДЕНИЕ: {d_stats.get('count', 0)} позиций")
@@ -2058,5 +2233,32 @@ if uploaded_file is not None:
             st.info("Нажмите кнопку 'Применить настройки' в сайдбаре для запуска расчета.")
             
     except Exception as e:
+        st.session_state['debug_info'] = {
+            'status': 'error',
+            'stage': getattr(e, '_debug_stage', 'load'),
+            'message': str(e),
+            'recommendation': _get_error_recommendation(e)
+        }
         st.error(f"Произошла ошибка при обработке файла: {e}")
         st.exception(e)
+    
+    # Отладочный блок — всегда при загруженном файле
+    if st.session_state.get('debug_info'):
+        dbg = st.session_state['debug_info']
+        expanded = dbg.get('status') == 'error'
+        with st.expander("🔧 Отладка", expanded=expanded):
+            if dbg.get('status') == 'ok':
+                if dbg.get('summary_empty') or dbg.get('valid_weeks', 0) == 0:
+                    st.warning("Расчёт выполнен, но сводка пуста (нет валидных недель).")
+                    st.markdown("**Рекомендация:** Возможно, все недели исключены по фильтрам (остатки, «не наша цена») или дотестовый период не найден. Ослабьте фильтры.")
+                else:
+                    st.success("Обработка завершена успешно.")
+                st.write(f"**Файл:** {dbg.get('file', '—')}")
+                st.write(f"**Тестовых товаров:** {dbg.get('test_products', 0)}")
+                st.write(f"**Контрольных товаров:** {dbg.get('control_products', 0)}")
+                st.write(f"**Строк в результатах:** {dbg.get('results_rows', 0)} (валидных недель: {dbg.get('valid_weeks', 0)}, исключено: {dbg.get('excluded_weeks', 0)})")
+            else:
+                st.error("Ошибка при обработке.")
+                st.write(f"**Этап:** {dbg.get('stage', '—')}")
+                st.write(f"**Сообщение:** `{dbg.get('message', '—')}`")
+                st.markdown(f"**Рекомендация:** {dbg.get('recommendation', 'Проверьте файл.')}")

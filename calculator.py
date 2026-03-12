@@ -1823,19 +1823,31 @@ class EffectCalculator:
             }, inplace=True)
             
         growth_mask = prod_effects['Total_Effect_Revenue'] > 0
+        decline_mask = prod_effects['Total_Effect_Revenue'] < 0
+        unchanged_mask = prod_effects['Total_Effect_Revenue'] == 0
         growth_df = prod_effects[growth_mask]
-        decline_df = prod_effects[~growth_mask]
+        decline_df = prod_effects[decline_mask]
+        unchanged_df = prod_effects[unchanged_mask]
         
         growth_stats = {
             'count': len(growth_df),
             'revenue_effect': growth_df['Total_Effect_Revenue'].sum(),
-            'profit_effect': growth_df['Total_Effect_Profit'].sum()
+            'profit_effect': growth_df['Total_Effect_Profit'].sum(),
+            'product_ids': growth_df['product_id'].tolist()
         }
         
         decline_stats = {
             'count': len(decline_df),
             'revenue_effect': decline_df['Total_Effect_Revenue'].sum(),
-            'profit_effect': decline_df['Total_Effect_Profit'].sum()
+            'profit_effect': decline_df['Total_Effect_Profit'].sum(),
+            'product_ids': decline_df['product_id'].tolist()
+        }
+        
+        unchanged_stats = {
+            'count': len(unchanged_df),
+            'revenue_effect': unchanged_df['Total_Effect_Revenue'].sum(),
+            'profit_effect': unchanged_df['Total_Effect_Profit'].sum(),
+            'product_ids': unchanged_df['product_id'].tolist()
         }
 
         return {
@@ -1863,7 +1875,8 @@ class EffectCalculator:
             'products_per_change': products_per_change,
             
             'growth_stats': growth_stats,
-            'decline_stats': decline_stats
+            'decline_stats': decline_stats,
+            'unchanged_stats': unchanged_stats
         }
 
     def get_control_group_info(self):
