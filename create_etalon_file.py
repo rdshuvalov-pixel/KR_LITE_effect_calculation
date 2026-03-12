@@ -5,6 +5,7 @@
 Результат: etalon_check.xlsx в текущей директории.
 """
 import pandas as pd
+from io import BytesIO
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -78,6 +79,19 @@ def generate_costs():
             })
             d += timedelta(days=1)
     return pd.DataFrame(rows)
+
+
+def get_etalon_bytes() -> bytes:
+    """Генерирует эталон в памяти и возвращает байты для скачивания."""
+    sales = generate_sales()
+    test_prices = generate_test_prices()
+    costs = generate_costs()
+    buf = BytesIO()
+    with pd.ExcelWriter(buf, engine='openpyxl') as w:
+        sales.to_excel(w, sheet_name='Продажи', index=False)
+        test_prices.to_excel(w, sheet_name='Тестовые цены', index=False)
+        costs.to_excel(w, sheet_name='Себестоимость', index=False)
+    return buf.getvalue()
 
 
 def main():

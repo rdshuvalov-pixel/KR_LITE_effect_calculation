@@ -20,6 +20,7 @@ import tempfile
 
 from restore_cost_from_sales import restore_cost_from_sales
 from restore_cost_history import restore_cost_history
+from create_etalon_file import get_etalon_bytes
 
 
 def _get_error_recommendation(err):
@@ -47,6 +48,18 @@ with st.expander("ℹ️ Методология (Читать)"):
             st.markdown(f.read())
     except FileNotFoundError:
         st.error("Файл METHODOLOGY.md не найден.")
+
+with st.expander("📋 Эталон для проверки", expanded=False):
+    etalon_bytes = get_etalon_bytes()
+    st.download_button(
+        "Скачать etalon_check.xlsx",
+        data=etalon_bytes,
+        file_name="etalon_check.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    st.markdown("**Как понять результат эталона:**")
+    st.markdown("- ✅ **Правильно:** «Обработка завершена успешно», валидных недель > 0, эффект не нулевой, есть категории рост / без изменений / падение.")
+    st.markdown("- ❌ **Неправильно:** «сводка пуста», валидных недель 0, все метрики нулевые.")
 
 # --- SIDEBAR CONFIGURATION ---
 with st.sidebar:
