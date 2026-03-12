@@ -7,14 +7,14 @@ import numpy as np
 import json
 from pathlib import Path
 
-# Параметры
-PRODUCT_ID = 4871  # "КИНДЕР БУЭНО" БАТОНЧИК МОЛОЧНЫЙ 43 ГР
+# Параметры (для etalon_check.xlsx используйте PRODUCT_ID = 101 или 102)
+PRODUCT_ID = 101
 PRE_TEST_WEEKS = 4
 STOCK_THRESHOLD_PCT = 51  # Допустимое время на остатке >= 51%
 CONTIGUOUS = True  # Непрерывный дотестовый период
 
-# Загрузка данных
-excel_path = Path(__file__).parent / "S-market_эффект_18012026.xlsx"
+# Загрузка данных (эталон: python3 create_etalon_file.py)
+excel_path = Path(__file__).parent / "etalon_check.xlsx"
 xl = pd.ExcelFile(excel_path)
 
 test_prices = pd.read_excel(xl, 'Тестовые цены')

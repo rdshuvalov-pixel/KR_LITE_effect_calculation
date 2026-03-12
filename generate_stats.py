@@ -44,8 +44,8 @@ print(f"  Порог отклонения цены: {PARAMS['activation_threshol
 print(f"  Округление: {'вверх' if PARAMS['activation_round_direction'] == 'up' else 'вниз'} до {PARAMS['activation_round_value']} коп.")
 print(f"  Мин. дней WAP: {PARAMS['activation_min_days_threshold']}")
 
-# Загрузка данных
-excel_path = Path(__file__).parent / "S-market_эффект_18012026.xlsx"
+# Загрузка данных (эталон: python3 create_etalon_file.py)
+excel_path = Path(__file__).parent / "etalon_check.xlsx"
 print(f"\nЗагрузка данных из {excel_path.name}...")
 
 calc = EffectCalculator(excel_path)

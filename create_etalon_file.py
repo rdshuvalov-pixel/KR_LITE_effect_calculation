@@ -29,17 +29,23 @@ def week_start(d):
 
 
 def generate_sales():
+    """Тестовые товары: до PRICE_START — цена 120 (Current), после — 150 (New_Price в допуске активации)."""
     rows = []
     for pid in ALL_PIDS:
         name = f"Товар {pid} ({'тест' if pid in TEST_PIDS else 'контроль'})"
         d = START_DATE
         while d <= END_DATE:
-            # 2-4 продажи в день, цена 100-200
+            if pid in TEST_PIDS and d >= PRICE_START:
+                price = 150.0  # New_Price — в допуске активации (1%)
+            elif pid in TEST_PIDS:
+                price = 120.0  # Current_Price
+            else:
+                price = 100 + (pid % 10) * 10  # контроль
             for _ in range(2):
                 rows.append({
                     'product_id': pid,
                     'recorded_on': d,
-                    'price': 100 + (pid % 10) * 10,
+                    'price': price,
                     'quantity': 1 + (pid % 3),
                     'name_full': name
                 })
