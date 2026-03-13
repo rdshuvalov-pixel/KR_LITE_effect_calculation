@@ -63,6 +63,9 @@ with st.expander("📋 Эталон для проверки", expanded=False):
 
 # --- SIDEBAR CONFIGURATION ---
 with st.sidebar:
+    if st.button("📎 Объединение Энтерсайт", use_container_width=True):
+        st.switch_page("pages/1_Объединение_Энтерсайт.py")
+    st.divider()
     st.header("Настройки")
 
     with st.form("settings_form"):

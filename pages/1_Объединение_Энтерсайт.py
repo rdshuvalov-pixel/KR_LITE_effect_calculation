@@ -9,6 +9,8 @@ import streamlit as st
 from scripts.generate import merge_entersite_from_uploads
 
 st.set_page_config(page_title="Объединение Энтерсайт", page_icon="📎", layout="centered")
+if st.sidebar.button("← К калькулятору", use_container_width=True):
+    st.switch_page("app.py")
 st.title("Объединение отчётов Энтерсайт")
 st.caption("Склейка периодов: агрегат за период → подённая разбивка. При пересечении приоритет у более позднего файла.")
 
