@@ -23,8 +23,10 @@ from openpyxl import Workbook
 
 
 def parse_period_from_filename(filename: str):
-    """Извлекает даты начала и конца периода из имени файла."""
-    pattern = r"с_(\d{2})_(\d{2})_(\d{4})_по_(\d{2})_(\d{2})_(\d{4})"
+    """Извлекает даты начала и конца периода из имени файла.
+    Поддерживает с_ДД_ММ_ГГГГ_по_ДД_ММ_ГГГГ и с_ДД.ММ.ГГГГ_по_ДД.ММ.ГГГГ
+    """
+    pattern = r"с_(\d{2})[._](\d{2})[._](\d{4})_по_(\d{2})[._](\d{2})[._](\d{4})"
     match = re.search(pattern, filename)
     if not match:
         return None, None
