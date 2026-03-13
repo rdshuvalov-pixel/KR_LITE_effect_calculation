@@ -18,11 +18,6 @@ import datetime
 from pathlib import Path
 import tempfile
 
-from restore_cost_from_sales import restore_cost_from_sales
-from restore_cost_history import restore_cost_history
-from create_etalon_file import get_etalon_bytes
-
-
 def _get_error_recommendation(err):
     """Рекомендации по типу ошибки."""
     err_str = str(err).lower()
@@ -49,22 +44,10 @@ with st.expander("ℹ️ Методология (Читать)"):
     except FileNotFoundError:
         st.error("Файл docs/METHODOLOGY.md не найден.")
 
-with st.expander("📋 Эталон для проверки", expanded=False):
-    etalon_bytes = get_etalon_bytes()
-    st.download_button(
-        "Скачать etalon_check.xlsx",
-        data=etalon_bytes,
-        file_name="etalon_check.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-    st.markdown("**Как понять результат эталона:**")
-    st.markdown("- ✅ **Правильно:** «Обработка завершена успешно», валидных недель > 0, эффект не нулевой, есть категории рост / без изменений / падение.")
-    st.markdown("- ❌ **Неправильно:** «сводка пуста», валидных недель 0, все метрики нулевые.")
-
 # --- SIDEBAR CONFIGURATION ---
 with st.sidebar:
-    if st.button("📎 Объединение Энтерсайт", use_container_width=True):
-        st.switch_page("pages/1_Объединение_Энтерсайт.py")
+    if st.button("🔧 Инструменты", use_container_width=True):
+        st.switch_page("pages/1_Инструменты.py")
     st.divider()
     st.header("Настройки")
 
@@ -146,59 +129,6 @@ with st.sidebar:
         activation_round_direction = "nearest"
 
 uploaded_file = st.file_uploader("Загрузите файл XLSX", type=['xlsx'])
-
-# Блок восстановления данных (Restore)
-if uploaded_file is not None:
-    if st.session_state.get('restore_file_key') != uploaded_file.name:
-        st.session_state.pop('restore_download', None)
-        st.session_state['restore_file_key'] = uploaded_file.name
-    with st.expander("🔄 Восстановление данных (Restore)", expanded=False):
-        st.caption("Предобработка файла перед расчётом. Результат — скачать изменённый Excel.")
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Восстановить себестоимость из продаж", key="btn_restore_sales"):
-                with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
-                    tmp.write(uploaded_file.getvalue())
-                    tmp_path = tmp.name
-                try:
-                    result = restore_cost_from_sales(tmp_path)
-                    with open(tmp_path, 'rb') as f:
-                        st.session_state['restore_download'] = {
-                            'data': f.read(), 'name': f"restored_from_sales_{uploaded_file.name}", 'msg': f"{result['rows']} строк, {result['products']} товаров"
-                        }
-                    Path(tmp_path).unlink(missing_ok=True)
-                except Exception as e:
-                    Path(tmp_path).unlink(missing_ok=True)
-                    st.session_state['restore_error'] = str(e)
-        with col2:
-            if st.button("Восстановить историю себестоимости", key="btn_restore_history"):
-                with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
-                    tmp.write(uploaded_file.getvalue())
-                    tmp_path = tmp.name
-                try:
-                    result = restore_cost_history(tmp_path)
-                    if result and result.get('rows', 0) > 0:
-                        with open(tmp_path, 'rb') as f:
-                            st.session_state['restore_download'] = {
-                                'data': f.read(), 'name': f"restored_history_{uploaded_file.name}", 'msg': f"Добавлено {result['rows']} строк"
-                            }
-                        Path(tmp_path).unlink(missing_ok=True)
-                    else:
-                        Path(tmp_path).unlink(missing_ok=True)
-                        st.session_state['restore_info'] = result.get('message', 'Нет данных для восстановления.')
-                except Exception as e:
-                    Path(tmp_path).unlink(missing_ok=True)
-                    st.session_state['restore_error'] = str(e)
-
-        if st.session_state.get('restore_error'):
-            st.error(st.session_state.pop('restore_error'))
-        if st.session_state.get('restore_info'):
-            st.info(st.session_state.pop('restore_info'))
-        if st.session_state.get('restore_download'):
-            dl = st.session_state['restore_download']
-            st.success(f"Готово: {dl['msg']}")
-            st.download_button("📥 Скачать результат", data=dl['data'], file_name=dl['name'], mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key="dl_restore")
-    st.divider()
 
 if uploaded_file is not None:
     try:
