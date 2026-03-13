@@ -38,9 +38,9 @@
 ## 2. Быстрая проверка (автоматический скрипт)
 
 ```bash
-python3 run_smoke_test.py
+python3 scripts/run_smoke_test.py
 # или с указанием файла:
-python3 run_smoke_test.py путь/к/файлу.xlsx
+python3 scripts/run_smoke_test.py путь/к/файлу.xlsx
 ```
 
 **Ожидаемый результат:** `[PASS]` по всем пунктам. Любой `[FAIL]` — инструмент работает некорректно.
@@ -107,7 +107,7 @@ python3 run_smoke_test.py путь/к/файлу.xlsx
 ### 5.4 Вспомогательные скрипты (опционально)
 - [ ] `restore_cost_from_sales.py` — при необходимости
 - [ ] `restore_cost_history.py` — при необходимости
-- [ ] `generate_stats.py` — консольный вывод
+- [ ] `scripts/generate_stats.py` — консольный вывод
 
 ---
 

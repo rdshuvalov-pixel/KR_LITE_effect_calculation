@@ -36,13 +36,12 @@ Vercel не поддерживает запуск Streamlit (Python-сервер
 ## Структура проекта
 
 ```
-app.py              # Основное Streamlit-приложение
-calculator.py       # Логика расчёта эффекта
-report_generator.py # Генерация Word-отчёта
-presentation_builder.py  # Генерация HTML-презентации
-presentation.html   # Шаблон презентации
+app.py, calculator.py, report_generator.py, presentation_builder.py  # Основное приложение
+presentation/       # Шаблоны презентации (HTML, стили, эксперименты)
+scripts/            # Утилиты: extract_data, generate_stats, run_smoke_test, generate
+docs/               # Документация: METHODOLOGY, DEBUG_CHECKLIST, DEPLOY
 ```
 
 ## Формат данных
 
-Excel с листами: **Тестовые цены**, **Продажи**, **Себестоимость**. Подробнее в `METHODOLOGY.md`.
+Excel с листами: **Тестовые цены**, **Продажи**, **Себестоимость**. Подробнее в `docs/METHODOLOGY.md`.

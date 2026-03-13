@@ -50,5 +50,5 @@ flowchart TB
 
 ## Текущее vs целевое
 
-- **Сейчас**: `stats_data.json` и `presentation_data.json` обновляются скриптами `generate_stats.py` и `extract_data.py` вручную. `presentation.html` читает их через `fetch()` при открытии.
+- **Сейчас**: `stats_data.json` и `presentation_data.json` обновляются скриптами `scripts/generate_stats.py` и `scripts/extract_data.py` вручную. `presentation/presentation.html` читает их через `fetch()` при открытии.
 - **Целевое**: из приложения после расчёта — экспорт JSON и генерация отдельного HTML-файла под текущий расчёт (файл самодостаточен или всегда идёт со своим набором JSON).

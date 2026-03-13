@@ -208,7 +208,7 @@ def build_presentation_data(calc, results, pid, activation_params, use_week_valu
 def generate_html(stats_data, presentation_data, template_path=None):
     """Генерирует самодостаточный HTML с встроенными данными."""
     base = Path(__file__).parent
-    tpl_path = template_path or (base / "presentation.html")
+    tpl_path = template_path or (base / "presentation" / "presentation.html")
     html = tpl_path.read_text(encoding='utf-8')
 
     pres_json = json.dumps(presentation_data or {}, ensure_ascii=False, default=_serialize)

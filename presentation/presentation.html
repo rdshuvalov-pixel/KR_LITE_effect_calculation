@@ -1237,8 +1237,8 @@
         }
         if (!presentation && !stats) {
           const [presentationRes, statsRes] = await Promise.all([
-            fetch('presentation_data.json'),
-            fetch('stats_data.json')
+            fetch('../presentation_data.json'),
+            fetch('../stats_data.json')
           ]);
           presentation = presentationRes.ok ? await presentationRes.json() : null;
           stats = statsRes.ok ? await statsRes.json() : null;

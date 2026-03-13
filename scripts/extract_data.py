@@ -14,7 +14,8 @@ STOCK_THRESHOLD_PCT = 51  # Допустимое время на остатке 
 CONTIGUOUS = True  # Непрерывный дотестовый период
 
 # Загрузка данных (эталон: python3 create_etalon_file.py)
-excel_path = Path(__file__).parent / "etalon_check.xlsx"
+ROOT = Path(__file__).parent.parent
+excel_path = ROOT / "etalon_check.xlsx"
 xl = pd.ExcelFile(excel_path)
 
 test_prices = pd.read_excel(xl, 'Тестовые цены')
@@ -174,7 +175,7 @@ print(f"\n=== JSON для презентации ===")
 print(json.dumps(presentation_data, ensure_ascii=False, indent=2))
 
 # Сохраняем в файл
-output_path = Path(__file__).parent / "presentation_data.json"
+output_path = ROOT / "presentation_data.json"
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(presentation_data, f, ensure_ascii=False, indent=2)
 print(f"\nДанные сохранены в {output_path}")

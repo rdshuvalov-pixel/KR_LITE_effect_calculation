@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
 Дымовой тест KeepRise Lite.
-Запуск: python run_smoke_test.py [путь_к_файлу.xlsx]
-Без аргумента ищет .xlsx в текущей директории.
+Запуск: python scripts/run_smoke_test.py [путь_к_файлу.xlsx]
+Без аргумента ищет .xlsx в корне проекта.
 Выводит [PASS]/[FAIL] по каждому шагу — инструмент корректен, если все PASS.
 """
 import sys
 from pathlib import Path
 
-# Корень проекта
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
 
 
 def find_xlsx():

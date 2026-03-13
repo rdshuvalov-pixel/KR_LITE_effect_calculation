@@ -2,10 +2,15 @@
 """
 Генерация полной статистики для презентации с параметрами сервиса.
 """
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
+
 import pandas as pd
 import numpy as np
 import json
-from pathlib import Path
 from datetime import datetime
 
 from calculator import EffectCalculator
@@ -45,7 +50,7 @@ print(f"  Округление: {'вверх' if PARAMS['activation_round_direct
 print(f"  Мин. дней WAP: {PARAMS['activation_min_days_threshold']}")
 
 # Загрузка данных (эталон: python3 create_etalon_file.py)
-excel_path = Path(__file__).parent / "etalon_check.xlsx"
+excel_path = ROOT / "etalon_check.xlsx"
 print(f"\nЗагрузка данных из {excel_path.name}...")
 
 calc = EffectCalculator(excel_path)
@@ -242,7 +247,7 @@ stats_data = {
 }
 
 # Сохраняем в JSON
-output_path = Path(__file__).parent / "stats_data.json"
+output_path = ROOT / "stats_data.json"
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(stats_data, f, ensure_ascii=False, indent=2)
 print(f"\nДанные сохранены в {output_path}")

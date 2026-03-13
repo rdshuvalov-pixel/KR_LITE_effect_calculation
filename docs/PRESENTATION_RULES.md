@@ -44,6 +44,6 @@
 
 ## Файлы
 
-- `presentation.html` — шаблон
+- `presentation/presentation.html` — шаблон
 - `pdf_generator.py` — `export_html_to_pdf(html_path, pdf_path)`
 - `presentation_builder.py` — `generate_html()`, `save_presentation_and_manage_history()`

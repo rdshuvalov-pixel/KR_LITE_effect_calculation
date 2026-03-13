@@ -44,10 +44,10 @@ st.title("KeepRise Lite: A/B Test Calculator")
 
 with st.expander("ℹ️ Методология (Читать)"):
     try:
-        with open("METHODOLOGY.md", "r") as f:
+        with open("docs/METHODOLOGY.md", "r") as f:
             st.markdown(f.read())
     except FileNotFoundError:
-        st.error("Файл METHODOLOGY.md не найден.")
+        st.error("Файл docs/METHODOLOGY.md не найден.")
 
 with st.expander("📋 Эталон для проверки", expanded=False):
     etalon_bytes = get_etalon_bytes()
